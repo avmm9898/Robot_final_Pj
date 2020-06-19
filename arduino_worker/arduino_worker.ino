@@ -1,11 +1,4 @@
 #include <Wire.h>
-#include <Adafruit_PWMServoDriver.h>
-#define SERVOMIN  102 // this is the 'minimum' pulse length count (out of 4096)
-#define SERVOMAX  512 // this is the 'maximum' pulse length count (out of 4096)
-
-
-// our servo
-Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver();
 
 // variable for reading input
 char input_str[100];
@@ -15,13 +8,15 @@ int input_sep = 0;
 char tmp[100];
 
 
+void armSetup();
+void carSetup();
+
 void setup() {
     Serial.begin(115200);
     myPrint("sys", "Start");
-    pwm.begin();
-    pwm.setPWMFreq(50);  // Analog servos run at ~50 Hz updates
 
-    arm_reset();
+    carSetup();
+    armSetup();
 }
 
 
@@ -75,43 +70,33 @@ void readInput() {
 
 // Run the input command after reading from serial
 void run_command() {
-    // wheel:
-    // e.g. `w0,30`; `w1,-120;`
-    // TODO
+    // wheel: c{mode}{speed},{displacement}
+    // e.g. `cf300,30;` `cb100,40;`
+    if (input_sep > 0 && input_str[0] == 'c') {
+        char mode = input_str[1];
+        input_str[input_sep] = '\0';
+        int sped = atoi(input_str + 2),
+            dist = atoi(input_str + (input_sep + 1));
+        sprintf(tmp, "Car mode %c move %d with speed %d", mode, dist, sped);
+        myPrint("car", tmp);
+        carMove(dist, sped, mode);
+        input_str[input_sep] = ',';
+    }
 
-    // arm: device, angle;
+    // arm: a{device},{angle};
     // e.g. `a0,120;` `a1,150;`
-    if(input_sep > 0 && input_str[0] == 'a') {
+    if (input_sep > 0 && input_str[0] == 'a') {
         int dev = input_str[1] - '0';
         int ang = atoi(input_str + (input_sep + 1));
-        sprintf(tmp, "Arm %d move to %d", dev, ang);
+        // sprintf(tmp, "Arm %d move to %d", dev, ang);
         // myPrint("arm", tmp);
-        pwm.setPWM(dev, 0, angleToPulse(ang));
+        armMove(dev, ang);
     }
 
     // reset
     // e.g. r0, r1
-    if(input_num >= 2 && input_str[0] == 'r' && input_str[1] == '0') {
-        arm_reset();
+    if (input_num >= 2 && input_str[0] == 'r' && input_str[1] == '0') {
+        armReset();
         return;
     }
-}
-
-
-// Reset arm angle to init state
-void arm_reset() {
-    pwm.setPWM(0, 0, angleToPulse(90));
-    pwm.setPWM(1, 0, angleToPulse(90));
-    pwm.setPWM(2, 0, angleToPulse(90));
-    pwm.setPWM(3, 0, angleToPulse(90));
-    delay(100);
-}
-
-
-// Map angle of 0 to 180 to Servo min and Servo max 
-int angleToPulse(int ang) {
-    int pulse = map(ang, 0, 180, SERVOMIN, SERVOMAX);
-    // sprintf(tmp, "Angle %d Pulse %d", ang, pulse);
-    // myPrint("debug", tmp);
-    return pulse;
 }
