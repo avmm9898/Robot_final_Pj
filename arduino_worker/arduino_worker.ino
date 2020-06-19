@@ -15,18 +15,8 @@ int input_sep = 0;
 char tmp[100];
 
 
-template<class T>
-void myPrint(char* log_type, T c) {
-    // log print function
-    Serial.print('[');
-    Serial.print(log_type);
-    Serial.print("] ");
-    Serial.println(c);
-}
-
-
 void setup() {
-    Serial.begin(9600);
+    Serial.begin(115200);
     myPrint("sys", "Start");
     pwm.begin();
     pwm.setPWMFreq(50);  // Analog servos run at ~50 Hz updates
@@ -36,13 +26,23 @@ void setup() {
 
 
 void loop() {
-    // read command
     readInput();
     // and do nothing
-    delay(10);
+    // delay(1);
 }
 
 
+// A log function
+template<class T>
+void myPrint(char* log_type, T c) {
+    Serial.print('[');
+    Serial.print(log_type);
+    Serial.print("] ");
+    Serial.println(c);
+}
+
+
+// Read serial input
 void readInput() {
     if (Serial.available() > 0) {
         // read one char
@@ -73,6 +73,7 @@ void readInput() {
 }
 
 
+// Run the input command after reading from serial
 void run_command() {
     // wheel:
     // e.g. `w0,30`; `w1,-120;`
@@ -84,7 +85,7 @@ void run_command() {
         int dev = input_str[1] - '0';
         int ang = atoi(input_str + (input_sep + 1));
         sprintf(tmp, "Arm %d move to %d", dev, ang);
-        myPrint("arm", tmp);
+        // myPrint("arm", tmp);
         pwm.setPWM(dev, 0, angleToPulse(ang));
     }
 
@@ -97,20 +98,20 @@ void run_command() {
 }
 
 
+// Reset arm angle to init state
 void arm_reset() {
-    // init angle of arm
     pwm.setPWM(0, 0, angleToPulse(90));
     pwm.setPWM(1, 0, angleToPulse(90));
     pwm.setPWM(2, 0, angleToPulse(90));
     pwm.setPWM(3, 0, angleToPulse(90));
-    delay(1000);
+    delay(100);
 }
 
 
+// Map angle of 0 to 180 to Servo min and Servo max 
 int angleToPulse(int ang) {
-    // map angle of 0 to 180 to Servo min and Servo max 
     int pulse = map(ang, 0, 180, SERVOMIN, SERVOMAX);
-    sprintf(tmp, "Angle %d Pulse %d", ang, pulse);
-    myPrint("debug", tmp);
+    // sprintf(tmp, "Angle %d Pulse %d", ang, pulse);
+    // myPrint("debug", tmp);
     return pulse;
 }
