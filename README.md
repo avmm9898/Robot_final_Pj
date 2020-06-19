@@ -8,7 +8,8 @@ Insert the object into hole using robot(wheel and arm) with RGBD camera.
 * `arduino_worker`
     An arduino script that allow to communicate with PC
 * `arduino_connector.py`
-    A python script that allow to communicate with arduino
+    A python script that allow to communicate with arduino.
+    The document of how to send command to arduino written here.
 
 
 ## Requirement
@@ -24,12 +25,20 @@ Insert the object into hole using robot(wheel and arm) with RGBD camera.
 `https://github.com/IntelRealSense/librealsense`
 
 
+## Unknown script
+* InputControlDistance
+* encoderSpeedDetection
+
+
 ## Test
 * test each joint of the arms
 `test_arm/test_arm.ino`
 
 * test the arms repetivily
 `test_arm_repetive.py`
+
+* test the car with encoding
+`test_encoder_car_control/test_encoder_car_control.ino`
 
 ## Data
 * Our google drive

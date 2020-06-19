@@ -7,7 +7,7 @@ int input_byte = 0;
 int input_sep = 0;
 char tmp[100];
 
-
+// setup function should declare first
 void armSetup();
 void carSetup();
 
