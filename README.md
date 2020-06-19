@@ -3,6 +3,23 @@
 ## Target
 Insert the object into hole using robot(wheel and arm) with RGBD camera.
 
+## Some utility
+* `arduino_worker`
+    An arduino script that allow to communicate with PC
+* `arduino_connector.py`
+    A python script that allow to communicate with arduino
+
+## Requirement
+* `PWM library`
+`android-cli lib install "Adafruit PWM Servo Driver Library"`
+
+* Realsense
+`https://github.com/IntelRealSense/librealsense`
+
+## Test
+* test the arms
+`test_arm/test_arm.ino`
+
 ## Data
 * Our google drive
 https://drive.google.com/drive/u/1/folders/18e6d5P7vW5tq1IALxg0aSmPtt-QSELH9
