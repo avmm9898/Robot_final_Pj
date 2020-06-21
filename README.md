@@ -34,8 +34,8 @@ Insert the object into hole using robot(wheel and arm) with RGBD camera.
 * test each joint of the arms
 `test_arm/test_arm.ino`
 
-* test the arms repetivily
-`test_arm_repetive.py`
+* test the arms repeatedly
+`test_arm_repetitive.py`
 
 * test the car with encoding
 `test_encoder_car_control/test_encoder_car_control.ino`
