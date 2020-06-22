@@ -13,8 +13,11 @@ Insert the object into hole using robot(wheel and arm) with RGBD camera.
 
 
 ## Requirement
-* Arduino `PWM library`
-`android-cli lib install "Adafruit PWM Servo Driver Library"`
+* Arduino(Uno)
+    * `PWM library`
+    * `arduino-cli lib install "Adafruit PWM Servo Driver Library"`
+    * `TimerOne`
+    * `arduino-cli lib install "TimerOne"`
 
 * Python3 and it's package
     * Python3.7+

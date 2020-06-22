@@ -13,14 +13,14 @@ unsigned int counter1 = 0;
 unsigned int counter2 = 0;
 
 // Motor A
-int enA = 11;
-int in1 = 13;
-int in2 = 12;
+const int enA = 11;
+const int in1 = 13;
+const int in2 = 12;
  
 // Motor B 
-int enB = 10;
-int in3 = 8;
-int in4 = 7;
+const int enB = 10;
+const int in3 = 8;
+const int in4 = 7;
  
 // Float for number of slots in encoder disk
 float diskslots = 360;  // encoder slot = 360
