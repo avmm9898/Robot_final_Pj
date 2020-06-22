@@ -11,6 +11,7 @@ char tmp[100];
 void armSetup();
 void carSetup();
 
+
 void setup() {
     Serial.begin(115200);
     myPrint("sys", "Start");
@@ -70,17 +71,43 @@ void readInput() {
 
 // Run the input command after reading from serial
 void run_command() {
-    // wheel: c{mode}{speed},{displacement}
-    // e.g. `cf300,30;` `cb100,40;`
+    // car: c{mode}{speed},{displacement}
+    // e.g. `cF300,30;` `cB100,40;`
     if (input_sep > 0 && input_str[0] == 'c') {
         char mode = input_str[1];
         input_str[input_sep] = '\0';
         int sped = atoi(input_str + 2),
             dist = atoi(input_str + (input_sep + 1));
-        sprintf(tmp, "Car mode %c move %d with speed %d", mode, dist, sped);
-        myPrint("car", tmp);
+        // sprintf(tmp, "Car mode %c move %d with speed %d", mode, dist, sped);
+        // myPrint("car", tmp);
         carMove(dist, sped, mode);
         input_str[input_sep] = ',';
+        return;
+    }
+
+    // wheel: w{mode}{wheel},{speed}
+    // e.g. `wFA,30;` `wRB,40;`
+    if (input_sep > 0 && input_str[0] == 'w') {
+        char mode = input_str[1];
+        char wheel = input_str[2];
+        int sped = atoi(input_str + (input_sep + 1));
+        sprintf(tmp, "Wheel %c speed %d with direction %c", wheel, sped, mode);
+        myPrint("wheel", tmp);
+        carSpeed(wheel, sped, mode);
+        return;
+    }
+
+    // get speed: s
+    // e.g. `s`
+    if (input_str[0] == 's') {
+        float speedA = getSpeed('A'),
+              speedB = getSpeed('B');
+        // should not comment out
+        // bug https://stackoverflow.com/questions/27651012/arduino-sprintf-float-not-formatting
+        //  sprintf(tmp, "%.2f,%.2f", speedA, speedB);
+        sprintf(tmp, "%d,%d", (int)speedA, (int)speedB);
+        myPrint("speed", tmp);
+        return;
     }
 
     // arm: a{device},{angle};
@@ -91,12 +118,17 @@ void run_command() {
         // sprintf(tmp, "Arm %d move to %d", dev, ang);
         // myPrint("arm", tmp);
         armMove(dev, ang);
+        return;
     }
 
     // reset
     // e.g. r0, r1
     if (input_num >= 2 && input_str[0] == 'r' && input_str[1] == '0') {
         armReset();
+        return;
+    }
+    if (input_num >= 2 && input_str[0] == 'r' && input_str[1] == '1') {
+        carReset();
         return;
     }
 }

@@ -20,7 +20,7 @@ void armReset() {
 }
 
 
-// Map angle of 0 to 180 to Servo min and Servo max 
+// Map angle of 0 to 180 to Servo min and Servo max
 int angleToPulse(int ang) {
     int pulse = map(ang, 0, 180, SERVOMIN, SERVOMAX);
     // sprintf(tmp, "Angle %d Pulse %d", ang, pulse);
