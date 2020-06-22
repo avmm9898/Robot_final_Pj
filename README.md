@@ -56,3 +56,6 @@ https://github.com/avmm9898/Robot_final_Pj/blob/master/doc/Progress2.pdf
 
 * Our Final
 Unfinished yet.
+
+## To do list
+* integrate playYOLO and realsense image, including acquire depth from x,y info.
