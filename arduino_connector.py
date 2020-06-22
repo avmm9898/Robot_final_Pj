@@ -2,6 +2,7 @@ import serial
 
 # init serial
 ser = serial.Serial("/dev/ttyACM0", 115200)
+speedtext = ""
 
 
 def writeArduino(s):
@@ -23,6 +24,9 @@ def writeArduino(s):
     while True:
         out = ser.readline().decode().strip()
         print(out)
+        if "[speed]" in out:
+            global speedtext
+            speedtext = out
         if "[echo]" not in out:
             continue
         if out == "[echo] " + s:
@@ -70,7 +74,6 @@ def setArduinoCar(mode, speed, distance=0):
         `L` for left,
     speed: Integer
         The rotation speed(mm/s)
-
     distance: Integer
         The distance you want to go(mm)
 
@@ -82,8 +85,60 @@ def setArduinoCar(mode, speed, distance=0):
     writeArduino(f"c{mode[0]}{speed},{distance};")
 
 
+def setArduinoSpeed(direction, speed, wheel):
+    """
+    Set Arduino Wheel speed
+
+    Parameters
+    ----------
+    Direction: Char
+        A single character to indicate direction
+        `F` for forward,
+        `B` for backward,
+        `R` for right,
+        `L` for left,
+    speed: Integer
+        The rotation speed(mm/s)
+    wheel: char
+        A or B wheel you want to set
+
+    Raises
+    ------
+    ValueError
+        See writeArduino
+    """
+    writeArduino(f"w{direction[0]}{wheel[0]},{speed};")
+
+
+def getArduinoSpeed():
+    """
+    Get Arduino Wheel speed
+
+    Returns 
+    ------
+    Speed: (Integer, Interger)
+        The speed in mm of A and B motor
+
+    Raises
+    ------
+    ValueError
+        See writeArduino
+    """
+    writeArduino("s;")
+    global speedtext
+    print(speedtext)
+    if speedtext:
+        speedA, speedB = speedtext.split(']')[1].split(',')
+        return int(speedA), int(speedB)
+    speedtext = ""
+
+
 if __name__ == "__main__":
     # python3 arduino_connector.py a0 135
+    # setArduinoArm(0, 100)
+    # setArduinoCar('F', 100, 10)
+    # setArduinoSpeed('F', 100, 'A')
+    # print(getArduinoSpeed())
     import sys
     s = sys.argv[1:]
     writeArduinoEasy(*s)
