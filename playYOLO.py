@@ -2,21 +2,16 @@ import os, time
 import argparse
 import cv2
 import numpy as np
+from realsense_basic import run
 
 #--------------------------------------------------------
-modelType = "yolo"  
-confThreshold = 0.4  #超過多少幾%的辨識率才會畫框框
-nmsThreshold = 0.4   #若同個目標畫了太多框框，調整此值
+confThreshold = 0.2  #超過多少幾%的辨識率才會畫框框
+nmsThreshold = 0.6   #若同個目標畫了太多框框，調整此值
 
 
 classesFile = "yolo/platfrom.names" #存放class的名字
 modelConfiguration = "yolo/platfrom.cfg"  #存放YOLO的設定檔
 modelWeights = "yolo/platfrom.weights"    #訓練好的模型位置
-
-
-
-displayScreen = True  #是否即時顯示預測結果
-outputToFile = False   #是否輸出成檔案
 
 #標籤和框框畫出來的參數
 fontSize = 0.35
@@ -25,15 +20,6 @@ labelColor = (0,0,255)
 boxbold = 1
 boxColor = (255,255,255)
 #--------------------------------------------------------
-
-#圖片輸入模型會自動壓縮成這個解析度
-if(modelType=="yolo"):
-    inpWidth = 416      
-    inpHeight = 416      
-else:
-    inpWidth = 320      
-    inpHeight = 320     
-
 
 #讀取我們放入的 class name 檔案
 classes = None
@@ -48,11 +34,7 @@ net = cv2.dnn.readNetFromDarknet(modelConfiguration, modelWeights)
 net.setPreferableBackend(cv2.dnn.DNN_BACKEND_OPENCV)
 net.setPreferableTarget(cv2.dnn.DNN_TARGET_CPU)
 
-#抓取我們在命令列輸入的檔名、相片模式或影片模式
-parser = argparse.ArgumentParser(description="Test an image or a video?")
-parser.add_argument("-i", dest='image', action='store', help='Image')
-parser.add_argument("-v", dest='video', action='store',help='Video file')
-#-----------------------------------------------------------------
+
 
 
 
@@ -97,8 +79,7 @@ def postprocess(frame, outs, orgFrame):
         drawPred(classIds[i], confidences[i], left, top, left + width, top + height, orgFrame)
     return indices
 
-def Myfinction():
-    print('設計函式\n')
+
 
 
 #用openCV畫畫的函式，畫了一個框框和寫了LABEL上去
@@ -108,17 +89,26 @@ def drawPred(classId, conf, left, top, right, bottom, orgFrame):
 
     classtype=classes[classId]
 
-    cv2.rectangle(frame, (left, top), (right, bottom), boxColor, boxbold)    #畫框框
-    cv2.putText(frame, labelName, (left, top-10), cv2.FONT_HERSHEY_COMPLEX, fontSize, labelColor, fontBold)    #寫字
+    cv2.rectangle(orgFrame, (left, top), (right, bottom), boxColor, boxbold)    #畫框框
+    cv2.putText(orgFrame, labelName, (left, top-10), cv2.FONT_HERSHEY_COMPLEX, fontSize, labelColor, fontBold)    #寫字
 
     #print(labelName)
             
-def detect_platfrom(frame):
-    orgFrame = frame.copy()
+def detect_platfrom(color_image, depth_image):
+    orgFrame = color_image.copy()
 
 
-    blob = cv2.dnn.blobFromImage(frame, 1/255, (inpWidth, inpHeight), [0,0,0], 1, crop=False)  #將三維圖片轉換成DNN在訓練的格式
+    blob = cv2.dnn.blobFromImage(color_image, 1/255, (256, 256), [0,0,0], 1, crop=False)  #將三維圖片轉換成DNN在訓練的格式
     net.setInput(blob)   #設定DNN輸入
     outs = net.forward(getOutputsNames(net))   #blob會經過每一層的轉換、計算
-    indices=postprocess(frame, outs, orgFrame)  #最後獲得偵測目標與座標
+    indices=postprocess(color_image, outs, orgFrame)  #最後獲得偵測目標與座標
+
+    
+    depth_colormap = cv2.applyColorMap(cv2.convertScaleAbs(depth_image, alpha=0.03), cv2.COLORMAP_JET)
+    return np.hstack([depth_colormap, orgFrame])
+
     return indices,orgFrame
+if __name__ == "__main__":
+    
+    run(detect_platfrom)
+

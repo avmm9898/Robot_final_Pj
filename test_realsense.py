@@ -20,6 +20,7 @@ aligned = rs.align(rs.stream.color)
 
 # Start streaming
 pipeline.start(config)
+img_counter=1
 
 try:
     while True:
@@ -45,6 +46,10 @@ try:
         if key & 0xFF == ord('q') or key == 27:
             cv2.destroyAllWindows()
             break
+        elif key == ord('s'):
+            img_name = "batch2_{}.jpg".format(img_counter)
+            cv2.imwrite(img_name, color_image)
+            img_counter+=1
 
 finally:
 
