@@ -91,8 +91,8 @@ void run_command() {
         char mode = input_str[1];
         char wheel = input_str[2];
         int sped = atoi(input_str + (input_sep + 1));
-        sprintf(tmp, "Wheel %c speed %d with direction %c", wheel, sped, mode);
-        myPrint("wheel", tmp);
+        // sprintf(tmp, "Wheel %c speed %d with direction %c", wheel, sped, mode);
+        // myPrint("wheel", tmp);
         carSpeed(wheel, sped, mode);
         return;
     }
