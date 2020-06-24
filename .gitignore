@@ -1,2 +1,4 @@
-
+.*.elf
+.*.hex
+__pycache__
 yolo/platfrom.weights

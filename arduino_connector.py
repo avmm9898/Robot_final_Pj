@@ -1,4 +1,5 @@
 import serial
+
 # init serial
 ser = serial.Serial("/dev/ttyACM0", 115200)
 ser.close()
@@ -139,8 +140,8 @@ def getArduinoSpeed():
 
 if __name__ == "__main__":
     # python3 arduino_connector.py a0 135
-    # setArduinoArm(0, 100)
-    # setArduinoCar('F', 100, 10)
+    # setArduinoArm(2, 0)
+    # setArduinoCar('R', 200, 100)
     # setArduinoSpeed('F', 100, 'A')
     # print(getArduinoSpeed())
     import sys

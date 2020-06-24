@@ -6,7 +6,7 @@ import threading
 from realsense_basic import run
 from arduino_connector import setArduinoCar, setArduinoArm
 
-
+# init
 image_shape=np.array((640, 480))
 thr = threading.Thread(target=lambda: print("Start Thread"))
 thr.start()
