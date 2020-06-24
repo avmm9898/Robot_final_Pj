@@ -1,7 +1,7 @@
 import serial
-
 # init serial
 ser = serial.Serial("/dev/ttyACM0", 115200)
+ser.close()
 speedtext = ""
 
 
@@ -20,6 +20,8 @@ def writeArduino(s):
         If the echo did not match the input, which
         indicate the connectaion may fail.
     """
+    ser.open()
+    print("Send: ", s)
     ser.write(s.encode())
     while True:
         out = ser.readline().decode().strip()
@@ -32,7 +34,9 @@ def writeArduino(s):
         if out == "[echo] " + s:
             break
         else:
+            ser.close()
             raise ValueError(out)
+    ser.close()
     return True
 
 

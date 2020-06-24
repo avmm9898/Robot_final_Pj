@@ -1,11 +1,15 @@
+import time
 import cv2
 import numpy as np
+import threading
 
 from realsense_basic import run
 from arduino_connector import setArduinoCar, setArduinoArm
 
 
 image_shape=np.array((640, 480))
+thr = threading.Thread(target=lambda: print("Start Thread"))
+thr.start()
 
 
 def detectAndGo(color_image, depth_image):
@@ -28,14 +32,24 @@ def detectAndGo(color_image, depth_image):
         width = image_shape / 16
 
     # draw center
-    # center, width = detect(color_image)
     tl = (center - width).astype(np.int)
     br = (center + width).astype(np.int)
     cv2.rectangle(color_image, tuple(tl), tuple(br), (0, 255, 0), 2)
 
     # get depth
     d = depth_image[tl[0]:br[0], tl[1]:br[1]].mean()
-    print(d)
+
+    # walk(Run command in threading)
+    global thr
+    print(d, center, thr)
+    if d > 500 and not thr.is_alive():
+        if center[0] > image_shape[0] * 2 / 3:
+            thr = threading.Thread(target=setArduinoCar, args=('R', 100, 100))
+        elif center[0] < image_shape[0] * 1 / 3:
+            thr = threading.Thread(target=setArduinoCar, args=('L', 100, 100))
+        else:
+            thr = threading.Thread(target=setArduinoCar, args=('F', 100, 100))
+        thr.start()
 
     # plot it
     stacked_mask = np.stack((mask,)*3, axis=-1)
@@ -44,6 +58,8 @@ def detectAndGo(color_image, depth_image):
 
 
 if __name__ == "__main__":
-    # setArduinoArm(0, 0)
-    # setArduinoArm(1, 0)
+    setArduinoArm(0, 0)
+    time.sleep(1)
+    setArduinoArm(1, 0)
+    time.sleep(1)
     run(detectAndGo)
