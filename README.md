@@ -4,7 +4,7 @@
 Insert the object into hole using robot(wheel and arm) with RGBD camera.
 
 
-## Some utility
+## Files
 * `arduino_worker`
     An arduino script that allow to communicate with PC
 * `arduino_connector.py`
@@ -18,6 +18,16 @@ Insert the object into hole using robot(wheel and arm) with RGBD camera.
     Read image and move the arm
 * `car_move_with_visual.py`
     Read image and move the car
+* `car_move_with_visual.py`
+    Read image and move the car
+* `/data`
+    Put non-code data here
+* `/doc`
+    Put documents here
+* `main.py`
+    The main function
+* `playYOLO.py`
+    Yolo related codes
 
 
 ## Requirement

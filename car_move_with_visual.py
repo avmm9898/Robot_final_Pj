@@ -41,6 +41,7 @@ def detectAndGo(color_image, depth_image):
 
     # walk(Run command in threading)
     global thr
+    # TODO: tune it
     print(d, center, thr)
     if d > 500 and not thr.is_alive():
         if center[0] > image_shape[0] * 2 / 3:
@@ -51,10 +52,13 @@ def detectAndGo(color_image, depth_image):
             thr = threading.Thread(target=setArduinoCar, args=('F', 100, 100))
         thr.start()
 
+    # TODO: set terminated condition
+    is_ok = False
+
     # plot it
     stacked_mask = np.stack((mask,)*3, axis=-1)
     depth_colormap = cv2.applyColorMap(cv2.convertScaleAbs(depth_image, alpha=0.03), cv2.COLORMAP_JET)
-    return np.hstack([depth_colormap, color_image, stacked_mask])
+    return is_ok, np.hstack([depth_colormap, color_image, stacked_mask])
 
 
 if __name__ == "__main__":

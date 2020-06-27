@@ -78,7 +78,9 @@ def run(func):
             color_image, depth_image = camera.read()
             if color_image is None:
                 return
-            images = func(color_image, depth_image)
+            ok, images = func(color_image, depth_image)
+            if ok:
+                break
 
             # Show images
             cv2.namedWindow('RealSense', cv2.WINDOW_AUTOSIZE)
@@ -94,5 +96,5 @@ def run(func):
 if __name__ == "__main__":
     def test(color_image, depth_image):
         depth_colormap = cv2.applyColorMap(cv2.convertScaleAbs(depth_image, alpha=0.3), cv2.COLORMAP_JET)
-        return np.hstack((depth_colormap, color_image))
+        return False, np.hstack((depth_colormap, color_image))
     run(test)
