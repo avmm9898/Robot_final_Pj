@@ -62,5 +62,10 @@ https://drive.google.com/drive/u/1/folders/18e6d5P7vW5tq1IALxg0aSmPtt-QSELH9
   
   
 
-## To do list
-* integrate playYOLO and realsense image, including acquire depth from x,y info.
+## State:
+
+1. YOLO偵測平台目標物，回傳XYZ，車子朝目標逼近
+2. 當行駛至70cm內，精準度增加，可以偵測深度(深度值700以內還算精準)
+3. 距離平台目標50cmcm左右，切換至洞偵測模型，開始辨識洞
+4. 辨識到3個洞，回傳3組XYZ
+5. 手臂根據XYZ移動
