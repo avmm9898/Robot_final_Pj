@@ -13,6 +13,9 @@ classesFile = "yolo/platfrom.names" #存放class的名字
 modelConfiguration = "yolo/platfrom.cfg"  #存放YOLO的設定檔
 modelWeights = "yolo/platfrom.weights"    #訓練好的模型位置
 
+classFile_hole
+
+
 #標籤和框框畫出來的參數
 fontSize = 0.35
 fontBold = 1
@@ -106,8 +109,7 @@ def detect_platfrom(color_image, depth_image):
     
     depth_colormap = cv2.applyColorMap(cv2.convertScaleAbs(depth_image, alpha=0.03), cv2.COLORMAP_JET)
     return np.hstack([depth_colormap, orgFrame])
-
-    return indices,orgFrame
+ 
 if __name__ == "__main__":
     
     run(detect_platfrom)

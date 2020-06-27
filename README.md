@@ -49,13 +49,18 @@ https://drive.google.com/drive/u/1/folders/18e6d5P7vW5tq1IALxg0aSmPtt-QSELH9
 
 ## Document
 * Our Proposal
-https://docs.google.com/document/d/18njmWKULvyB6Nja7IZb4NpPqIBjUhZPCYzez5XdNj9Y/edit
+  https://docs.google.com/document/d/18njmWKULvyB6Nja7IZb4NpPqIBjUhZPCYzez5XdNj9Y/edit
+
 * Our Progress 2
-https://github.com/avmm9898/Robot_final_Pj/blob/master/doc/Progress2.pdf
+  https://github.com/avmm9898/Robot_final_Pj/blob/master/doc/Progress2.pdf
+
 * Our Final
-Unfinished yet.
-* YOLO辨識模型 map93%:
-  https://drive.google.com/file/d/1nLM1Zs12mxuan1jGzbRmieglgZ2iBw1N/view?usp=sharing
+  Unfinished yet.
+
+* YOLOv3 辨識模型，包含平台tiny、洞
+  https://drive.google.com/drive/folders/1iq4aOWEoC3pH7jgbg-wTGPG5zBOkf2vy?usp=sharing
+  
+  
 
 ## To do list
 * integrate playYOLO and realsense image, including acquire depth from x,y info.
