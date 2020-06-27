@@ -106,8 +106,7 @@ def detect_platfrom(color_image, depth_image):
     
     depth_colormap = cv2.applyColorMap(cv2.convertScaleAbs(depth_image, alpha=0.03), cv2.COLORMAP_JET)
     return np.hstack([depth_colormap, orgFrame])
-
-    return indices,orgFrame
+ 
 if __name__ == "__main__":
     
     run(detect_platfrom)
