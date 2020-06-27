@@ -41,9 +41,29 @@ class Camera():
         # Convert images to numpy arrays
         color_image = np.asanyarray(aligned_frames.get_color_frame().get_data())
         depth_image = np.asanyarray(aligned_frames.get_depth_frame().get_data())
-        # color_image = np.asanyarray(frames.get_color_frame().get_data())
-        # depth_image = np.asanyarray(frames.get_depth_frame().get_data())
         return color_image, depth_image
+
+
+    def readWithIntrinsics(self):
+        """ Use this before getDepth """
+        # read
+        frames = self.pipeline.wait_for_frames()
+        depth_frame = frames.get_depth_frame()
+        # color_frame = frames.get_color_frame()
+
+        # save intrinsics
+        self.depth_intrinsics = rs.video_stream_profile(depth_frame.profile).get_intrinsics()
+
+        # Convert images to numpy arrays
+        aligned_frames = self.aligned.process(frames)
+        color_image = np.asanyarray(aligned_frames.get_color_frame().get_data())
+        depth_image = np.asanyarray(aligned_frames.get_depth_frame().get_data())
+        return color_image, depth_image
+
+    def getXYZ(self, x, y, d):
+        """ Get realworld xyz """
+        return rs.rs2_deproject_pixel_to_point(self.depth_intrinsics, [x, y], d)
+
 
     def stop(self):
         print("Stop camera")

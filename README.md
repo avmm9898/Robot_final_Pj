@@ -10,6 +10,14 @@ Insert the object into hole using robot(wheel and arm) with RGBD camera.
 * `arduino_connector.py`
     A python script that allow to communicate with arduino.
     The document of how to send command to arduino written here.
+* `realsense_basic.py`
+    Camera Object for reading colored image and depth image
+* `arm_inverse_kinematic.py`
+    Inverse kinematic
+* `arm_move_with_visual.py`
+    Read image and move the arm
+* `car_move_with_visual.py`
+    Read image and move the car
 
 
 ## Requirement
@@ -42,6 +50,7 @@ Insert the object into hole using robot(wheel and arm) with RGBD camera.
 
 * test the car with encoding
 `test_encoder_car_control/test_encoder_car_control.ino`
+
 
 ## Data
 * Our google drive

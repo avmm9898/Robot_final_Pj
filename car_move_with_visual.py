@@ -25,7 +25,7 @@ def detectAndGo(color_image, depth_image):
     mask_xy = np.where(mask)
     if len(mask_xy[0]):
         center = np.flip(np.mean(mask_xy, axis=1))
-        width = np.array([50, 50])
+        width = np.array([20, 20])
     else:
         print(mask_xy)
         center = image_shape / 2
@@ -37,7 +37,7 @@ def detectAndGo(color_image, depth_image):
     cv2.rectangle(color_image, tuple(tl), tuple(br), (0, 255, 0), 2)
 
     # get depth
-    d = depth_image[tl[0]:br[0], tl[1]:br[1]].mean()
+    d = depth_image[tl[1]:br[1], tl[0]:br[0]].mean()
 
     # walk(Run command in threading)
     global thr
