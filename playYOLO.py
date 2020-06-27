@@ -13,6 +13,9 @@ classesFile = "yolo/platfrom.names" #存放class的名字
 modelConfiguration = "yolo/platfrom.cfg"  #存放YOLO的設定檔
 modelWeights = "yolo/platfrom.weights"    #訓練好的模型位置
 
+classFile_hole
+
+
 #標籤和框框畫出來的參數
 fontSize = 0.35
 fontBold = 1
