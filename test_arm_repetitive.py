@@ -1,4 +1,4 @@
-from arduino_connector import setArduinoArm
+from win_arduino_connector import setArduinoArm
 import numpy as np
 import time
 
