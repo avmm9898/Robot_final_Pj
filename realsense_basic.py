@@ -70,7 +70,7 @@ class Camera():
         self.pipeline.stop()
 
 
-def run(func):
+def run(func, net):
     """ Run forever with func """
     try:
         camera = Camera()
@@ -78,14 +78,14 @@ def run(func):
             color_image, depth_image = camera.read()
             if color_image is None:
                 return
-            ok, images = func(color_image, depth_image)
+            ok, images = func(net, color_image, depth_image)
             if ok:
                 break
 
             # Show images
             cv2.namedWindow('RealSense', cv2.WINDOW_AUTOSIZE)
             cv2.imshow('RealSense', images)
-            key = cv2.waitKey(100)
+            key = cv2.waitKey(10)
             if key & 0xFF == ord('q') or key == 27:
                 cv2.destroyAllWindows()
                 break

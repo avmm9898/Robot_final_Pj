@@ -4,66 +4,73 @@ import numpy as np
 import threading
 
 from realsense_basic import run
-from arduino_connector import setArduinoCar, setArduinoArm
+from win_arduino_connector import setArduinoCar, setArduinoArm
+from playYOLO import YOLO
 
 # init
 image_shape=np.array((640, 480))
 thr = threading.Thread(target=lambda: print("Start Thread"))
 thr.start()
 
+depth_avg=[999]*5
 
-def detectAndGo(color_image, depth_image):
+def detectAndGo(net, color_image, depth_image):
     """ Custom detect method """
     # detect
-    hsv = cv2.cvtColor(color_image, cv2.COLOR_BGR2HSV)
-    lower_red = np.array([0,100,100])
-    upper_red = np.array([10,255,255])
-    mask = cv2.inRange(hsv, lower_red, upper_red)
-    lower_red = np.array([175,100,100])
-    upper_red = np.array([190,255,255])
-    mask = cv2.bitwise_or(mask, cv2.inRange(hsv, lower_red, upper_red))
-    mask_xy = np.where(mask)
-    if len(mask_xy[0]):
-        center = np.flip(np.mean(mask_xy, axis=1))
-        width = np.array([20, 20])
-    else:
-        print(mask_xy)
-        center = image_shape / 2
-        width = image_shape / 16
+    depth_colormap = cv2.applyColorMap(cv2.convertScaleAbs(depth_image, alpha=0.3), cv2.COLORMAP_JET)
+    centers = net.detect(color_image)
+    IMG_x=320
+    IMG_y=240
 
-    # draw center
-    tl = (center - width).astype(np.int)
-    br = (center + width).astype(np.int)
-    cv2.rectangle(color_image, tuple(tl), tuple(br), (0, 255, 0), 2)
+    if len(centers)>0:
+        for i in centers:
+            IMG_x=int(i[0])
+            IMG_y=int(i[1])
 
     # get depth
-    d = depth_image[tl[1]:br[1], tl[0]:br[0]].mean()
+    
+    d = depth_image[IMG_x-5:IMG_x+5 ,IMG_y-5:IMG_y+5 ].mean()
+    
+    global depth_avg
+    depth_avg = depth_avg[1:] + [d]
+    d=np.mean(depth_avg)
 
     # walk(Run command in threading)
     global thr
     # TODO: tune it
-    print(d, center, thr)
-    if d > 500 and not thr.is_alive():
-        if center[0] > image_shape[0] * 2 / 3:
-            thr = threading.Thread(target=setArduinoCar, args=('R', 100, 100))
-        elif center[0] < image_shape[0] * 1 / 3:
-            thr = threading.Thread(target=setArduinoCar, args=('L', 100, 100))
+    print(d, (IMG_x,IMG_y), thr)
+
+    is_ok = False
+    if not thr.is_alive():
+        if IMG_x > image_shape[0] /2+50:
+            thr = threading.Thread(target=setArduinoCar, args=('R', 150, 1))
+        elif IMG_x < image_shape[0]/2-50:
+            thr = threading.Thread(target=setArduinoCar, args=('L', 150, 1))
         else:
-            thr = threading.Thread(target=setArduinoCar, args=('F', 100, 100))
-        thr.start()
+            thr = threading.Thread(target=setArduinoCar, args=('F', 120, 2))
+        if d<=380:
+            is_ok = True
+        else:  
+            thr.start()
+    
+        
+    
+
 
     # TODO: set terminated condition
-    is_ok = False
+    
 
     # plot it
-    stacked_mask = np.stack((mask,)*3, axis=-1)
+    
     depth_colormap = cv2.applyColorMap(cv2.convertScaleAbs(depth_image, alpha=0.03), cv2.COLORMAP_JET)
-    return is_ok, np.hstack([depth_colormap, color_image, stacked_mask])
+    return is_ok, np.hstack([depth_colormap, color_image])
 
 
 if __name__ == "__main__":
+    #net=YOLO("platform_tiny",0.3)
+    net = YOLO("yolov3_hole",0.8)
     setArduinoArm(0, 0)
     time.sleep(1)
     setArduinoArm(1, 0)
     time.sleep(1)
-    run(detectAndGo)
+    run(detectAndGo, net)

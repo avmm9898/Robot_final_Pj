@@ -150,9 +150,7 @@ def getArduinoSpeed():
 if __name__ == "__main__":
     # python3 arduino_connector.py a0 135
     # setArduinoArm(2, 0)
-    # setArduinoCar('R', 200, 100)
+    setArduinoCar('R', 200, 100)
     # setArduinoSpeed('F', 100, 'A')
     # print(getArduinoSpeed())
-    import sys
-    s = sys.argv[1:]
-    writeArduinoEasy(*s)
+    

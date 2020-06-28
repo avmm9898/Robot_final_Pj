@@ -7,11 +7,11 @@ from realsense_basic import run
 
 
 class YOLO():
-    def __init__(self, modelname):
+    def __init__(self, modelname, confidence):
         self.classesFile        = "yolo/" + modelname + ".names"    # 存放class的名字
         self.modelWeights       = "yolo/" + modelname + ".weights"  # 訓練好的模型位置
         self.modelConfiguration = "yolo/" + modelname + ".cfg"      # 存放YOLO的設定檔
-
+        self.confThreshold = confidence
         # 讀取 class name 檔案
         self.classes = None
         with open(self.classesFile, 'rt') as f:
@@ -54,8 +54,8 @@ class YOLO():
             # print(labelName)
 
         # --------------------------------------------------------
-        confThreshold = 0.2  # 超過多少幾%的辨識率才會畫框框
-        nmsThreshold = 0.6   # 若同個目標畫了太多框框，調整此值
+          
+        nmsThreshold = 0.8   # 若同個目標畫了太多框框，調整此值
         frameHeight = frame.shape[0]
         frameWidth = frame.shape[1]
 
@@ -67,7 +67,7 @@ class YOLO():
                 scores = detection[5:]
                 classId = np.argmax(scores)
                 confidence = scores[classId]
-                if confidence > confThreshold:
+                if confidence > self.confThreshold: # 超過多少幾%的辨識率才會畫框框
                     center_x = int(detection[0] * frameWidth)
                     center_y = int(detection[1] * frameHeight)
                     width = int(detection[2] * frameWidth)
@@ -78,7 +78,7 @@ class YOLO():
                     confidences.append(float(confidence))
                     boxes.append([left, top, width, height])  # 每個目標都有一個box，內含座標
 
-        indices = cv2.dnn.NMSBoxes(boxes, confidences, confThreshold, nmsThreshold)  # 這裡就用到了NMS，如果目標被重複框選，就會消成一個
+        indices = cv2.dnn.NMSBoxes(boxes, confidences, self.confThreshold, nmsThreshold)  # 這裡就用到了NMS，如果目標被重複框選，就會消成一個
         centers = []
 
         for i in indices:
