@@ -79,6 +79,9 @@ https://drive.google.com/drive/u/1/folders/18e6d5P7vW5tq1IALxg0aSmPtt-QSELH9
 * YOLOv3 辨識模型，包含平台tiny、洞
   https://drive.google.com/drive/folders/1iq4aOWEoC3pH7jgbg-wTGPG5zBOkf2vy?usp=sharing
   
+* Final report:
+  https://docs.google.com/document/d/1U4hTdkWk3_W5jxNzboUAq03IZFFIPNzS-lzf1Dpz3Pk/edit?usp=sharing
+  
   
 
 ## State:
