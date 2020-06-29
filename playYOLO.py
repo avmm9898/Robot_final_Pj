@@ -99,15 +99,15 @@ class YOLO():
 
 
 if __name__ == "__main__":
-    net = YOLO("platform_tiny")
-    # net = YOLO("yolov3_hole")
+    net = YOLO("platform_tiny", 0.8)
+    net = YOLO("yolov3_hole", 0.8)
 
     def runNet(net):
         def test(color_image, depth_image):
             if color_image is None:
                 return False, None
             depth_colormap = cv2.applyColorMap(cv2.convertScaleAbs(depth_image, alpha=0.3), cv2.COLORMAP_JET)
-            centers = net.detect(color_image)
+            centers = net.detect(color_image, depth_image)
             print(centers)
             return False, np.hstack((depth_colormap, color_image))
         return test
