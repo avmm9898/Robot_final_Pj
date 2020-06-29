@@ -1,7 +1,8 @@
 import serial
 
 # init serial
-ser = serial.Serial("/dev/ttyACM0", 115200)
+# ser = serial.Serial("COM45", baudrate = 57600)
+ser = serial.Serial("/dev/ttyACM0", 57600)
 ser.close()
 speedtext = ""
 
@@ -25,7 +26,8 @@ def writeArduino(s):
     print("Send: ", s)
     ser.write(s.encode())
     while True:
-        out = ser.readline().decode().strip()
+        # out = ser.readline().decode().strip()
+        out = ser.read_until(';'.encode()).decode().strip()
         print(out)
         if "[speed]" in out:
             global speedtext

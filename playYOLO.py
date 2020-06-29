@@ -19,9 +19,7 @@ class YOLO():
 
         # 載入YOLO的model
         print("[INFO] loading YOLO from disk...")
-        #TODO DEBUG
         self.net = cv2.dnn.readNetFromDarknet(self.modelConfiguration, self.modelWeights)
-        # self.net = cv2.dnn.readNetFromDarknet(self.modelConfiguration)
 
         # 設定硬體運行的環境
         self.net.setPreferableBackend(cv2.dnn.DNN_BACKEND_OPENCV)
@@ -54,7 +52,7 @@ class YOLO():
             # print(labelName)
 
         # --------------------------------------------------------
-          
+
         nmsThreshold = 0.8   # 若同個目標畫了太多框框，調整此值
         frameHeight = frame.shape[0]
         frameWidth = frame.shape[1]
@@ -67,7 +65,7 @@ class YOLO():
                 scores = detection[5:]
                 classId = np.argmax(scores)
                 confidence = scores[classId]
-                if confidence > self.confThreshold: # 超過多少幾%的辨識率才會畫框框
+                if confidence > self.confThreshold:  # 超過多少幾%的辨識率才會畫框框
                     center_x = int(detection[0] * frameWidth)
                     center_y = int(detection[1] * frameHeight)
                     width = int(detection[2] * frameWidth)
@@ -92,7 +90,7 @@ class YOLO():
             centers.append([left + width/2, top + height/2])
         return centers
 
-    def detect(self, color_image):
+    def detect(self, color_image, depth_image):
         blob = cv2.dnn.blobFromImage(color_image, 1 / 255, (256, 256), [0, 0, 0], 1, crop=False)  # 將三維圖片轉換成DNN在訓練的格式
         self.net.setInput(blob)  # 設定DNN輸入
         outs = self.net.forward(self.getOutputsNames())  # blob會經過每一層的轉換、計算

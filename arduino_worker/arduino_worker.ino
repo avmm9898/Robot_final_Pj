@@ -14,7 +14,6 @@ void carSetup();
 
 void setup() {
     Serial.begin(57600);
-    // while(!Serial)
     myPrint("sys", "Start");
 
     carSetup();
@@ -36,8 +35,6 @@ void myPrint(char* log_type, T c) {
     Serial.print(log_type);
     Serial.print("] ");
     Serial.println(c);
-    delay(20);
-    
 }
 
 
@@ -46,7 +43,6 @@ void readInput() {
     if (Serial.available() > 0) {
         // read one char
         input_byte = Serial.read();
-        //Serial.println(input_str);
         input_str[input_num] = input_byte;
         // myPrint("debug", input_str[input_num]);
 
@@ -69,7 +65,6 @@ void readInput() {
         if(input_str[input_num - 1] == ',') {
             input_sep = input_num - 1;
         }
-        
     }
 }
 

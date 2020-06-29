@@ -70,7 +70,7 @@ class Camera():
         self.pipeline.stop()
 
 
-def run(func, net):
+def run(func):
     """ Run forever with func """
     try:
         camera = Camera()
@@ -78,7 +78,7 @@ def run(func, net):
             color_image, depth_image = camera.read()
             if color_image is None:
                 return
-            ok, images = func(net, color_image, depth_image)
+            ok, images = func(color_image, depth_image)
             if ok:
                 break
 
