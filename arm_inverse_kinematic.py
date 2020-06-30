@@ -50,7 +50,7 @@ def getAC():
 # DH table should written in list not variables
 DH = [
     # alpha a d theta
-    [0      , 0, 0.08, None],
+    [0      , 0, 0.0625, None],
     [np.pi/2, 0,    0, None],
     [0,   0.115,    0, None],
     [0,   0.105,    0, None],
@@ -61,8 +61,9 @@ DH = [
 def xyz2Armangle(x, y, z):
     """ Read XYZ from camera and output 4 arm angle """
     # input position from camera
-    P_TC = np.array([x, y, z, 1])  # position vector of target in carema frame
-    P_AC = getAC().dot(P_TC)  # position vector of target in arm base frame
+    # P_TC = np.array([x, y, z, 1])  # position vector of target in carema frame
+    # P_AC = getAC().dot(P_TC)  # position vector of target in arm base frame
+    P_AC = np.array([x, y, z, 1])
 
     # redefine it
     al0, a0, d1 = DH[0][:3]
