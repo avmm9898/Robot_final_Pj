@@ -23,12 +23,12 @@ def writeArduino(s):
         indicate the connectaion may fail.
     """
     ser.open()
-    print("Send: ", s)
+    # print("Send: ", s)
     ser.write(s.encode())
     while True:
         # out = ser.readline().decode().strip()
         out = ser.read_until(';'.encode()).decode().strip()
-        print(out)
+        # print(out)
         if "[speed]" in out:
             global speedtext
             speedtext = out

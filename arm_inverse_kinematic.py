@@ -37,7 +37,7 @@ def linkTransform(al, a, d, th):
 
 def getAC():
     """ Custom transformarion from camera to arm base """
-    h = 0.1  # z component of origin C
+    h = 0.15  # z component of origin C
     b = -0.1  # y component of origin C
     th = 0 * -np.pi / 180  # rotation about x axis
     c, s = np.cos(th), np.sin(th)
@@ -48,31 +48,37 @@ def getAC():
 
 
 # DH table should written in list not variables
-DH_param = []
-al0 = 0
-al1 = np.pi/2
-al2 = 0
-al3 = 0
-al4 = 0
-
-a0 = 0
-a1 = 0
-a2 = 0.12
-a3 = 0.105
-a4 = 0.0494
-
-d1 = 0.05
-d2 = 0
-d3 = 0
-d4 = 0
-d5 = 0
+DH = [
+    # alpha a d theta
+    [0      , 0, 0.0625, None],
+    [np.pi/2, 0,    0, None],
+    [0,   0.115,    0, None],
+    [0,   0.105,    0, None],
+    [0,   0.127,    0,    0],  # end-effector add here
+]
 
 
-def xyz2Armangle(x, y, z):
-    """ Read XYZ from camera and output 4 arm angle """
+def xyz2angle(x, y, z):
+    """
+    Read XYZ from camera and output 4 angles on some baseline
+
+    Parameters
+    ===========
+    X for forwarding
+    Y for left
+    Z for Upward
+    """
     # input position from camera
-    P_TC = np.array([x, y, z, 1])  # position vector of target in carema frame
-    P_AC = getAC().dot(P_TC)  # position vector of target in arm base frame
+    # P_TC = np.array([x, y, z, 1])  # position vector of target in carema frame
+    # P_AC = getAC().dot(P_TC)  # position vector of target in arm base frame
+    P_AC = np.array([x, y, z, 1])
+
+    # redefine it
+    al0, a0, d1 = DH[0][:3]
+    al1, a1, d2 = DH[1][:3]
+    al2, a2, d3 = DH[2][:3]
+    al3, a3, d4 = DH[3][:3]
+    al4, a4, d5 = DH[4][:3]
 
     # output position from transformation
     X, Y, Z = P_AC[:3]  # position in arm base frame
@@ -96,17 +102,22 @@ def xyz2Armangle(x, y, z):
 
     th4 = -(th2 + th3 - tht)  # th4 from summing of all theta
 
-    return [th1, th2, th3, th4]
+    return np.array([th1, th2, th3, th4])
 
 
 if __name__ == "__main__":
-    xyz = [0.1, 0., 0.05]
-    theta = xyz2Armangle(*xyz)
-    print("Theta", theta)
-    T0e = linkTransform(al0, a0, d1, theta[0]).dot(
-          linkTransform(al1, a1, d2, theta[1])).dot(
-          linkTransform(al2, a2, d3, theta[2])).dot(
-          linkTransform(al3, a3, d4, theta[3])).dot(
-          linkTransform(al4, a4,  0,  0))
+    xyz = [0.16, 0.11, 0.15]
+    angle = xyz2angle(*xyz)
+    T0 =        linkTransform(*DH[0][:3], angle[0])
+    T1 = T0.dot(linkTransform(*DH[1][:3], angle[1]))
+    T2 = T1.dot(linkTransform(*DH[2][:3], angle[2]))
+    T3 = T2.dot(linkTransform(*DH[3][:3], angle[3]))
+    T4 = T3.dot(linkTransform(*DH[4][:3], 0))
+
+    print("Angle", angle)
+    print("P0", T0[:3, 3])
+    print("P1", T1[:3, 3])
+    print("P2", T2[:3, 3])
+    print("P3", T3[:3, 3])
+    print("P4", T4[:3, 3])
     print("Input: ", xyz)
-    print("Output:", np.linalg.inv(getAC()).dot(T0e)[:, 3])

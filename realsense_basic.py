@@ -3,7 +3,9 @@ import numpy as np
 import cv2
 
 
-image_shape=np.array((640, 480))
+image_shape = np.array((640, 480))
+scale = 170 / 640
+focus = 150
 
 
 class Camera():
@@ -61,9 +63,16 @@ class Camera():
         return color_image, depth_image
 
     def getXYZ(self, x, y, d):
-        """ Get realworld xyz """
-        return rs.rs2_deproject_pixel_to_point(self.depth_intrinsics, [x, y], d)
-
+        """ Get realworld xyz from x,y in image and depth of object distance"""
+        # calibrated transformation in 2020-06-30
+        cy = (x - image_shape[1] / 2) * -scale
+        cx = (y - image_shape[0] / 2) * scale
+        z = d / np.sqrt(cx ** 2 + cy ** 2 + f ** 2) * focus
+        x = cx * z / focus
+        y = cy * z / focus
+        # This default method is not correct
+        # return rs.rs2_deproject_pixel_to_point(self.depth_intrinsics, [x, y], d)
+        return [x, y, z]
 
     def stop(self):
         print("Stop camera")
