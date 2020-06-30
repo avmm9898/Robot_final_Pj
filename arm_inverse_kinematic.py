@@ -54,12 +54,20 @@ DH = [
     [np.pi/2, 0,    0, None],
     [0,   0.115,    0, None],
     [0,   0.105,    0, None],
-    [0,   0.030,    0,    0],
+    [0,   0.127,    0,    0],  # end-effector add here
 ]
 
 
-def xyz2Armangle(x, y, z):
-    """ Read XYZ from camera and output 4 arm angle """
+def xyz2angle(x, y, z):
+    """
+    Read XYZ from camera and output 4 angles on some baseline
+
+    Parameters
+    ===========
+    X for forwarding
+    Y for left
+    Z for Upward
+    """
     # input position from camera
     # P_TC = np.array([x, y, z, 1])  # position vector of target in carema frame
     # P_AC = getAC().dot(P_TC)  # position vector of target in arm base frame
@@ -94,29 +102,22 @@ def xyz2Armangle(x, y, z):
 
     th4 = -(th2 + th3 - tht)  # th4 from summing of all theta
 
-    th3 += np.pi / 2
-    th1 = np.mod(th1, 2 * np.pi)
-    th2 = np.mod(th2, 2 * np.pi)
-    th3 = np.mod(th3, 2 * np.pi)
-    th4 = np.mod(th4, 2 * np.pi)
-
-    return [th1, th2, th3, th4]
+    return np.array([th1, th2, th3, th4])
 
 
 if __name__ == "__main__":
-    xyz = [0.1, 0., 0.05]
-    theta = xyz2Armangle(*xyz)
-    # if np.any(np.array(theta) > np.pi):
-    #     raise ValueError("Out of working space")
-    print("Theta", theta)
-    T0 = linkTransform(0, 0, 0, 0)
-    for i in range(len(DH)):
-        if DH[i][3] is None:
-            if i == 2:
-                theta[i] -= np.pi / 2
-            T0 = T0.dot(linkTransform(*DH[i][:3], theta[i]))
-        else:
-            print(DH[i])
-            T0 = T0.dot(linkTransform(*DH[i]))
+    xyz = [0.16, 0.11, 0.15]
+    angle = xyz2angle(*xyz)
+    T0 =        linkTransform(*DH[0][:3], angle[0])
+    T1 = T0.dot(linkTransform(*DH[1][:3], angle[1]))
+    T2 = T1.dot(linkTransform(*DH[2][:3], angle[2]))
+    T3 = T2.dot(linkTransform(*DH[3][:3], angle[3]))
+    T4 = T3.dot(linkTransform(*DH[4][:3], 0))
+
+    print("Angle", angle)
+    print("P0", T0[:3, 3])
+    print("P1", T1[:3, 3])
+    print("P2", T2[:3, 3])
+    print("P3", T3[:3, 3])
+    print("P4", T4[:3, 3])
     print("Input: ", xyz)
-    print("Output:", np.linalg.inv(getAC()).dot(T0)[:, 3])

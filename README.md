@@ -14,6 +14,8 @@ Insert the object into hole using robot(wheel and arm) with RGBD camera.
     Camera Object for reading colored image and depth image
 * `arm_inverse_kinematic.py`
     Inverse kinematic
+* `arm_move.py`
+    The way to moving arm by xyz position
 * `arm_move_with_visual.py`
     Read image and move the arm
 * `car_move_with_visual.py`
