@@ -37,7 +37,7 @@ def linkTransform(al, a, d, th):
 
 def getAC():
     """ Custom transformarion from camera to arm base """
-    h = 0.1  # z component of origin C
+    h = 0.15  # z component of origin C
     b = -0.1  # y component of origin C
     th = 0 * -np.pi / 180  # rotation about x axis
     c, s = np.cos(th), np.sin(th)
@@ -48,24 +48,14 @@ def getAC():
 
 
 # DH table should written in list not variables
-DH_param = []
-al0 = 0
-al1 = np.pi/2
-al2 = 0
-al3 = 0
-al4 = 0
-
-a0 = 0
-a1 = 0
-a2 = 0.12
-a3 = 0.105
-a4 = 0.0494
-
-d1 = 0.05
-d2 = 0
-d3 = 0
-d4 = 0
-d5 = 0
+DH = [
+    # alpha a d theta
+    [0      , 0, 0.08, None],
+    [np.pi/2, 0,    0, None],
+    [0,   0.115,    0, None],
+    [0,   0.105,    0, None],
+    [0,   0.030,    0,    0],
+]
 
 
 def xyz2Armangle(x, y, z):
@@ -73,6 +63,13 @@ def xyz2Armangle(x, y, z):
     # input position from camera
     P_TC = np.array([x, y, z, 1])  # position vector of target in carema frame
     P_AC = getAC().dot(P_TC)  # position vector of target in arm base frame
+
+    # redefine it
+    al0, a0, d1 = DH[0][:3]
+    al1, a1, d2 = DH[1][:3]
+    al2, a2, d3 = DH[2][:3]
+    al3, a3, d4 = DH[3][:3]
+    al4, a4, d5 = DH[4][:3]
 
     # output position from transformation
     X, Y, Z = P_AC[:3]  # position in arm base frame
@@ -96,17 +93,29 @@ def xyz2Armangle(x, y, z):
 
     th4 = -(th2 + th3 - tht)  # th4 from summing of all theta
 
+    th3 += np.pi / 2
+    th1 = np.mod(th1, 2 * np.pi)
+    th2 = np.mod(th2, 2 * np.pi)
+    th3 = np.mod(th3, 2 * np.pi)
+    th4 = np.mod(th4, 2 * np.pi)
+
     return [th1, th2, th3, th4]
 
 
 if __name__ == "__main__":
     xyz = [0.1, 0., 0.05]
     theta = xyz2Armangle(*xyz)
+    # if np.any(np.array(theta) > np.pi):
+    #     raise ValueError("Out of working space")
     print("Theta", theta)
-    T0e = linkTransform(al0, a0, d1, theta[0]).dot(
-          linkTransform(al1, a1, d2, theta[1])).dot(
-          linkTransform(al2, a2, d3, theta[2])).dot(
-          linkTransform(al3, a3, d4, theta[3])).dot(
-          linkTransform(al4, a4,  0,  0))
+    T0 = linkTransform(0, 0, 0, 0)
+    for i in range(len(DH)):
+        if DH[i][3] is None:
+            if i == 2:
+                theta[i] -= np.pi / 2
+            T0 = T0.dot(linkTransform(*DH[i][:3], theta[i]))
+        else:
+            print(DH[i])
+            T0 = T0.dot(linkTransform(*DH[i]))
     print("Input: ", xyz)
-    print("Output:", np.linalg.inv(getAC()).dot(T0e)[:, 3])
+    print("Output:", np.linalg.inv(getAC()).dot(T0)[:, 3])
