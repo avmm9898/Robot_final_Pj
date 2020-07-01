@@ -50,7 +50,7 @@ def getAC():
 # DH table should written in list not variables
 DH = [
     # alpha a d theta
-    [0      , 0, 0.0625, None],
+    [0      , 0, 0.08, None],
     [np.pi/2, 0,    0, None],
     [0,   0.115,    0, None],
     [0,   0.105,    0, None],
