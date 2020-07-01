@@ -37,14 +37,17 @@ def linkTransform(al, a, d, th):
 
 def getAC():
     """ Custom transformarion from camera to arm base """
-    h = 0.15  # z component of origin C
-    b = -0.1  # y component of origin C
-    th = 0 * -np.pi / 180  # rotation about x axis
-    c, s = np.cos(th), np.sin(th)
-    return np.array([[1, 0,  0, 0],
-                     [0, c, -s, b],
-                     [0, s,  c, h],
-                     [0, 0,  0, 1]])
+    h = 0.2975  # z component of origin C
+    b = -0.2325  # y component of origin C
+    w = 0.0235 # x component of origin c
+    th_x = -(0 * np.pi /180 + np.pi/2) # rotation about x axis
+    th_z = -np.pi/2 # rotation about z axis
+    cx, sx = np.cos(th_x), np.sin(th_x)
+    cz, sz = np.cos(th_z), np.sin(th_z)
+    return np.array([[  cz,   -sz,   0,  w],
+                     [sz*cx, cz*cx, -sx, b],
+                     [sz*sx, cz*sx,  cx, h],
+                     [   0,    0,    0,  1]])
 
 
 # DH table should written in list not variables
