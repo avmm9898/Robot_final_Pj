@@ -66,9 +66,9 @@ def detectAndGo(func_detect, color_image, depth_image):
 
     is_ok = False  # Terminated
     if not thr.is_alive():
-        if IMG_x > image_shape[0] / 2 + 50:
+        if IMG_x > image_shape[0] / 2 + 30:
             thr = threading.Thread(target=setArduinoCar, args=('R', 150, 1))
-        elif IMG_x < image_shape[0] / 2 - 50:
+        elif IMG_x < image_shape[0] / 2 - 70:
             thr = threading.Thread(target=setArduinoCar, args=('L', 150, 1))
         else:
             thr = threading.Thread(target=setArduinoCar, args=('F', 120, 2))

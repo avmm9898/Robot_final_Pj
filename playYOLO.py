@@ -99,7 +99,7 @@ class YOLO():
 
 
 if __name__ == "__main__":
-    net = YOLO("platform_tiny", 0.8)
+    #net = YOLO("platform_tiny", 0.8)
     net = YOLO("yolov3_hole", 0.8)
 
     def runNet(net):
