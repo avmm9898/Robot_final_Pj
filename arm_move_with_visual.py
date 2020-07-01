@@ -4,8 +4,7 @@ import numpy as np
 import pyrealsense2 as rs
 
 from realsense_basic import Camera
-# from arduino_connector import setArduinoArm
-from arm_inverse_kinematic import xyz2Armangle
+from arm_inverse_kinematic import moveArmByXYZ
 
 
 debug = True
@@ -61,23 +60,13 @@ def getXYZ(cam, color_image, depth_image):
     return xyz
 
 
-def moveArmByXYZ(xyz):
-    """ Give xyz then move arm """
-    # get angle for arm
-    ths = xyz2Armangle(*xyz)
-
-    # set arm angle
-    for i in range(4):
-        setArduinoArm(i, ths[i])
-
-
 def continue_run(func):
     """ Run forever for debug """
     try:
         cam = Camera()
 
         while True:
-            color_image, depth_image = cam.readWithIntrinsics()
+            color_image, depth_image = cam.read()
             if color_image is None or depth_image is None:
                 return
             depth_colormap = cv2.applyColorMap(cv2.convertScaleAbs(depth_image, alpha=0.03), cv2.COLORMAP_JET)
@@ -106,7 +95,7 @@ def onetime_run(func):
 
         # wait for stable the image
         for i in range(10):
-            color_image, depth_image = cam.readWithIntrinsics()
+            color_image, depth_image = cam.read()
             if color_image is None or depth_image is None:
                 continue
             time.sleep(0.1)
@@ -129,7 +118,7 @@ def onetime_run(func):
         xyz = np.mean(xyzs, axis=0)
         if not debug:
             print(xyz)
-        moveArmByXYZ(xyz)
+        moveArmByXYZ(*xyz)
 
         # Show images
         if debug:
@@ -143,5 +132,5 @@ def onetime_run(func):
 
 
 if __name__ == "__main__":
-    onetime_run(getXYZ)
-    # continue_run(getXYZ)
+    # onetime_run(getXYZ)
+    continue_run(getXYZ)
