@@ -4,7 +4,7 @@ import numpy as np
 import pyrealsense2 as rs
 
 from realsense_basic import Camera
-from arm_inverse_kinematic import moveArmByXYZ
+from arm_inverse_kinematic import getAC
 
 
 debug = True
@@ -14,7 +14,7 @@ def purple_detect(color_image):
     """ An example for detecting purple things and output bounding box """
     # get purple color
     hsv = cv2.cvtColor(color_image, cv2.COLOR_BGR2HSV)
-    lower_purple = np.array([120, 20, 130])
+    lower_purple = np.array([120, 20, 50])
     upper_purple = np.array([160, 40, 185])
     mask = cv2.inRange(hsv, lower_purple, upper_purple)
 
@@ -24,7 +24,7 @@ def purple_detect(color_image):
 
     # debug: cannot find things
     if len(stats) <= 1:
-        if debug:
+        if False:
             import matplotlib.pyplot as plt
             hsv = cv2.cvtColor(color_image, cv2.COLOR_BGR2HSV)
             plt.imshow(hsv)
@@ -32,9 +32,11 @@ def purple_detect(color_image):
         return None, None
 
     # find max area of purple
+    # print(stats)
     idx = 1 + np.argmax(stats[1:, 4])
     box = stats[idx]
-    center = centroids[idx].astype(np.int)
+    # center = centroids[idx].astype(np.int)
+    center = np.array([box[0] + box[2] // 2, box[1] + box[3] // 2])
     # print(center, box)
     return center, box
 
@@ -47,11 +49,8 @@ def getXYZ(cam, color_image, depth_image):
 
     # get real xyz
     d = depth_image[center[1]-1:center[1]+2, center[0]-1:center[0]+2].mean()
+    print(d)
     xyz = cam.getXYZ(center[1], center[0], d)
-
-    # debug
-    if debug:
-        print("intr_depth", xyz)
 
     # plot bounding box
     cv2.rectangle(color_image, tuple(box[:2]), tuple(box[:2] + box[2:4]), (0, 255, 0), 2)
@@ -72,6 +71,10 @@ def continue_run(func):
             depth_colormap = cv2.applyColorMap(cv2.convertScaleAbs(depth_image, alpha=0.03), cv2.COLORMAP_JET)
 
             xyz = func(cam, color_image, depth_image)
+            if xyz is not None:
+                #print(xyz)
+                xyz[2] *= -1
+                print(getAC().dot([*xyz, 1]))
 
             # draw box on it
             images = np.hstack([depth_colormap, color_image])
