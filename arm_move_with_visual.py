@@ -3,6 +3,7 @@ import cv2
 import numpy as np
 import pyrealsense2 as rs
 
+from functools import partial
 from realsense_basic import Camera
 from arm_inverse_kinematic import transAC
 
@@ -56,6 +57,28 @@ def getPurpleXYZ(cam, color_image, depth_image):
     cv2.rectangle(color_image, tuple(center - 1), tuple(center + 1), (255, 0, 0), 2)
 
     return xyz
+
+def YoloDetect_xyz(cam, func_detect, color_image, depth_image):
+    # detect
+    depth_colormap = cv2.applyColorMap(cv2.convertScaleAbs(depth_image, alpha=0.3), cv2.COLORMAP_JET)
+    centers = func_detect(color_image)
+    mean_x=0
+    mean_y=0
+    xyz=[]
+    if len(centers)>0:
+        for i in centers:
+            mean_x+=int(i[0]/len(centers))
+            mean_y+=int(i[1]/len(centers))
+
+        # get depth
+        d = depth_image[mean_x-20:mean_x+20, mean_y-20:mean_y+20].mean()
+        
+        # walk(Run command in threading)
+        for i in centers:
+            xyz.append(cam.getXYZ(i[0], i[1], d))
+        print(xyz)
+    return xyz
+
 
 
 def continue_run(func):

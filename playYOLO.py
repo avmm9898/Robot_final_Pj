@@ -90,7 +90,7 @@ class YOLO():
             centers.append([left + width/2, top + height/2])
         return centers
 
-    def detect(self, color_image, depth_image):
+    def detect(self, color_image):
         blob = cv2.dnn.blobFromImage(color_image, 1 / 255, (256, 256), [0, 0, 0], 1, crop=False)  # 將三維圖片轉換成DNN在訓練的格式
         self.net.setInput(blob)  # 設定DNN輸入
         outs = self.net.forward(self.getOutputsNames())  # blob會經過每一層的轉換、計算

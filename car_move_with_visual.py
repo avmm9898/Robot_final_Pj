@@ -12,7 +12,7 @@ from playYOLO import YOLO
 image_shape = np.array((640, 480))
 thr = threading.Thread(target=lambda: print("Start Thread"))
 thr.start()
-depth_avg = [999] * 5  # the array for moving average
+depth_moving_window = [999] * 5  # the array for moving average
 
 
 def example_detect(color_image, depth_image):
@@ -44,7 +44,7 @@ def detectAndGo(func_detect, color_image, depth_image):
     """ Custom detect method """
     # detect
     depth_colormap = cv2.applyColorMap(cv2.convertScaleAbs(depth_image, alpha=0.3), cv2.COLORMAP_JET)
-    centers = func_detect(color_image, depth_image)
+    centers = func_detect(color_image)
     IMG_x=320
     IMG_y=240
 
@@ -54,7 +54,7 @@ def detectAndGo(func_detect, color_image, depth_image):
             IMG_y=int(i[1])
 
     # get depth
-    d = depth_image[IMG_x-5:IMG_x+5, IMG_y-5:IMG_y+5].mean()
+    d = depth_image[IMG_x-50:IMG_x+50, IMG_y-50:IMG_y+50].mean()
 
     global depth_avg
     depth_avg = depth_avg[1:] + [d]
@@ -66,20 +66,66 @@ def detectAndGo(func_detect, color_image, depth_image):
 
     is_ok = False  # Terminated
     if not thr.is_alive():
-        if IMG_x > image_shape[0] / 2 + 30:
-            thr = threading.Thread(target=setArduinoCar, args=('R', 150, 1))
-        elif IMG_x < image_shape[0] / 2 - 70:
-            thr = threading.Thread(target=setArduinoCar, args=('L', 150, 1))
-        else:
-            thr = threading.Thread(target=setArduinoCar, args=('F', 120, 2))
+        
         if d <= 380:
             is_ok = True
         else:
+            if IMG_x > image_shape[0] / 2 + 30:
+                thr = threading.Thread(target=setArduinoCar, args=('R', 150, 1))
+            elif IMG_x < image_shape[0] / 2 - 70:
+                thr = threading.Thread(target=setArduinoCar, args=('L', 150, 1))
+            else:
+                thr = threading.Thread(target=setArduinoCar, args=('F', 120, 2))
             thr.start()
 
     # plot it
     depth_colormap = cv2.applyColorMap(cv2.convertScaleAbs(depth_image, alpha=0.03), cv2.COLORMAP_JET)
     return is_ok, np.hstack([depth_colormap, color_image])
+
+def MinorApproach(func_detect, color_image, depth_image):
+    # detect
+    depth_colormap = cv2.applyColorMap(cv2.convertScaleAbs(depth_image, alpha=0.3), cv2.COLORMAP_JET)
+    centers = func_detect(color_image)
+    mean_x=0
+    mean_y=0
+
+    if len(centers)>0:
+        for i in centers:
+            mean_x+=int(i[0]/len(centers))
+            mean_y+=int(i[1]/len(centers))
+
+    # get depth
+    d = depth_image[IMG_x-20:IMG_x+20, IMG_y-20:IMG_y+20].mean()
+
+    global depth_moving_window
+    depth_moving_window = depth_moving_window[1:] + [d]
+    d=np.mean(depth_moving_window)
+
+    # walk(Run command in threading)
+    global thr
+    print(d, (mean_x, mean_y), thr)
+
+    is_ok = False  # Terminated
+    if not thr.is_alive():
+        
+        if d <= 400 and d >=350:
+            is_ok = True
+        elif d <= 350:
+            thr = threading.Thread(target=setArduinoCar, args=('B', 120, 1))
+            thr.start()
+        else:
+            if mean_x > image_shape[0] / 2 + 30:
+                thr = threading.Thread(target=setArduinoCar, args=('R', 150, 1))
+            elif mean_y < image_shape[0] / 2 - 70:
+                thr = threading.Thread(target=setArduinoCar, args=('L', 150, 1))
+            else:
+                thr = threading.Thread(target=setArduinoCar, args=('F', 120, 1))
+            thr.start()
+
+    # plot it
+    depth_colormap = cv2.applyColorMap(cv2.convertScaleAbs(depth_image, alpha=0.03), cv2.COLORMAP_JET)
+    return is_ok, np.hstack([depth_colormap, color_image])
+
 
 
 if __name__ == "__main__":
