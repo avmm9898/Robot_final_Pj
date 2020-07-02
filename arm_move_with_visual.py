@@ -15,7 +15,7 @@ def purple_detect(color_image):
     # get purple color
     hsv = cv2.cvtColor(color_image, cv2.COLOR_BGR2HSV)
     lower_purple = np.array([120, 20, 50])
-    upper_purple = np.array([160, 80, 185])
+    upper_purple = np.array([160, 80, 155])
     mask = cv2.inRange(hsv, lower_purple, upper_purple)
 
     # group purple area
@@ -41,7 +41,7 @@ def purple_detect(color_image):
     return center, box
 
 
-def getXYZ(cam, color_image, depth_image):
+def getPurpleXYZ(cam, color_image, depth_image):
     """ Get object XYZ from Image """
     center, box = purple_detect(color_image)
     if center is None:
@@ -73,9 +73,11 @@ def continue_run(func):
 
             xyz = func(cam, color_image, depth_image)
             if xyz is not None:
-                print(xyz)
-                # xyz[2] *= -1
-                # print(getAC().dot([*xyz, 1]))
+                # print(xyz)
+                xyz[2] *= -1
+                axyz = getAC().dot([*np.array(xyz) / 1000, 1])
+
+                print("arm xyz", f"{axyz[0]:.03f} {axyz[1]:.03f} {axyz[2]:.03f}")
 
             # draw box on it
             images = np.hstack([depth_colormap, color_image])
@@ -136,5 +138,5 @@ def onetime_run(func):
 
 
 if __name__ == "__main__":
-    # onetime_run(getXYZ)
-    continue_run(getXYZ)
+    # onetime_run(getPurpleXYZ)
+    continue_run(getPurpleXYZ)
