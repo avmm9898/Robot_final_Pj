@@ -67,7 +67,7 @@ class Camera():
         # calibrated transformation in 2020-06-30
         cy = (x - image_shape[1] / 2) * -scale
         cx = (y - image_shape[0] / 2) * scale
-        z = d / np.sqrt(cx ** 2 + cy ** 2 + focus ** 2) * focus
+        z = d
         x = cx * z / focus
         y = cy * z / focus
         # This default method is not correct

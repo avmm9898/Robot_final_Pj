@@ -3,8 +3,6 @@ import time
 from arduino_connector import setArduinoArm
 from arm_inverse_kinematic import xyz2angle
 
-pos_init = np.array([90, 90, 90, 90])
-
 
 def xyz2Armangle(x, y, z):
     """
@@ -19,18 +17,17 @@ def xyz2Armangle(x, y, z):
     angle[3] -= np.pi * 3 / 2
     angle = np.mod(angle, 2 * np.pi)
 
-    if np.any(angle < 0) or np.any(angle > np.pi):
-        print(angle)
-        raise ValueError("Out of working space")
+    if np.any(angle < 0) or np.any(angle > np.pi) or np.any(np.isnan(angle)):
+        raise ValueError(str(angle) + "is out of working space")
 
     # rad to deg
     return np.round(angle * 180 / np.pi).astype(np.int)
 
 
-def moveArmByXYZ(x, y, z, slow=False):
+def moveArmByXYZ(x, y, z, slow=False, pos_init=[90, 90, 90, 90]):
     """ Give xyz then move arm """
     # get angle for arm
-    ths = xyz2Armangle(*xyz)
+    ths = xyz2Armangle(x, y, z)
 
     # set arm angle
     if not slow:
@@ -40,11 +37,12 @@ def moveArmByXYZ(x, y, z, slow=False):
         for i in range(4):
             setArduinoArm(i, int(pos_init[i]))
         pos_targ = np.array(ths)
-        pos = np.linspace(pos_init, pos_targ, num=40)
+        pos = np.linspace(pos_init, pos_targ, num=10)
         for p in pos:
             for i in range(4):
                 setArduinoArm(i, int(p[i]))
                 time.sleep(0.001)
+    return np.array(ths, dtype=np.int)
 
 
 if __name__ == "__main__":

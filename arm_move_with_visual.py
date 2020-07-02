@@ -15,7 +15,7 @@ def purple_detect(color_image):
     # get purple color
     hsv = cv2.cvtColor(color_image, cv2.COLOR_BGR2HSV)
     lower_purple = np.array([120, 20, 50])
-    upper_purple = np.array([160, 40, 185])
+    upper_purple = np.array([160, 80, 185])
     mask = cv2.inRange(hsv, lower_purple, upper_purple)
 
     # group purple area
@@ -23,7 +23,7 @@ def purple_detect(color_image):
     _, _, stats, centroids = cv2.connectedComponentsWithStats(mask1, connectivity=8)
 
     # debug: cannot find things
-    if len(stats) <= 1:
+    if len(stats) <= 1 or stats[1 + np.argmax(stats[1:, 4]), -1] < 200:
         if False:
             import matplotlib.pyplot as plt
             hsv = cv2.cvtColor(color_image, cv2.COLOR_BGR2HSV)
@@ -49,8 +49,9 @@ def getXYZ(cam, color_image, depth_image):
 
     # get real xyz
     d = depth_image[center[1]-1:center[1]+2, center[0]-1:center[0]+2].mean()
-    print(d)
     xyz = cam.getXYZ(center[1], center[0], d)
+    # print("xyd", f"{center[0]:04.0f} {center[1]:04.0f} {d:04.0f}",
+    #       "xyz", f"{xyz[0]:04.0f} {xyz[1]:04.0f} {xyz[2]:04.0f}")
 
     # plot bounding box
     cv2.rectangle(color_image, tuple(box[:2]), tuple(box[:2] + box[2:4]), (0, 255, 0), 2)
@@ -72,9 +73,9 @@ def continue_run(func):
 
             xyz = func(cam, color_image, depth_image)
             if xyz is not None:
-                #print(xyz)
-                xyz[2] *= -1
-                print(getAC().dot([*xyz, 1]))
+                print(xyz)
+                # xyz[2] *= -1
+                # print(getAC().dot([*xyz, 1]))
 
             # draw box on it
             images = np.hstack([depth_colormap, color_image])
