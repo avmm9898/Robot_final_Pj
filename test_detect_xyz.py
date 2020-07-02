@@ -4,10 +4,8 @@ import numpy as np
 import pyrealsense2 as rs
 
 from realsense_basic import Camera
-from arm_inverse_kinematic import transAC
-
-
-debug = True
+from arm_inverse_kinematic import transAC, xyz2angle
+from arm_move import xyz2Armangle
 
 
 def purple_detect(color_image):
@@ -37,7 +35,7 @@ def purple_detect(color_image):
     box = stats[idx]
     # center = centroids[idx].astype(np.int)
     center = np.array([box[0] + box[2] // 2, box[1] + box[3] // 2])
-    # print(center, box)
+    # print("center and box", center, box)
     return center, box
 
 
@@ -50,6 +48,8 @@ def getPurpleXYZ(cam, color_image, depth_image):
     # get real xyz
     d = depth_image[center[1]-1:center[1]+2, center[0]-1:center[0]+2].mean()
     xyz = cam.getXYZ(center[1], center[0], d)
+    # print("xyd", f"{center[0]:04.0f} {center[1]:04.0f} {d:04.0f}",
+    #       "xyz", f"{xyz[0]:04.0f} {xyz[1]:04.0f} {xyz[2]:04.0f}")
 
     # plot bounding box
     cv2.rectangle(color_image, tuple(box[:2]), tuple(box[:2] + box[2:4]), (0, 255, 0), 2)
@@ -73,6 +73,11 @@ def continue_run(func):
             if xyz is not None:
                 axyz = transAC(*xyz)
                 print("arm xyz", f"{axyz[0]:.03f} {axyz[1]:.03f} {axyz[2]:.03f}")
+                try:
+                    angle = xyz2Armangle(*axyz)
+                    print("Angle", angle)
+                except ValueError as e:
+                    print(e)
 
             # draw box on it
             images = np.hstack([depth_colormap, color_image])
@@ -84,54 +89,10 @@ def continue_run(func):
             if key & 0xFF == ord('q') or key == 27:
                 cv2.destroyAllWindows()
                 break
-    finally:
-        cam.stop()
-
-
-def onetime_run(func):
-    """ Run one time for real world """
-    try:
-        cam = Camera()
-        xyzs = []
-
-        # wait for stable the image
-        for i in range(10):
-            color_image, depth_image = cam.read()
-            if color_image is None or depth_image is None:
-                continue
             time.sleep(0.1)
-
-            # collect xyz
-            xyz = func(cam, color_image, depth_image)
-            if xyz is None:
-                continue
-            xyzs.append(xyz)
-
-            # debug
-            if debug:
-                depth_colormap = cv2.applyColorMap(cv2.convertScaleAbs(depth_image, alpha=0.03), cv2.COLORMAP_JET)
-                images = np.hstack([depth_colormap, color_image])
-                cv2.namedWindow('RealSense', cv2.WINDOW_AUTOSIZE)
-                cv2.imshow('RealSense', images)
-                key = cv2.waitKey(1)
-
-        # get xyz and move the arm
-        xyz = np.mean(xyzs, axis=0)
-        if not debug:
-            print(xyz)
-        moveArmByXYZ(*xyz)
-
-        # Show images
-        if debug:
-            if key & 0xFF == ord('q') or key == 27:
-                cv2.destroyAllWindows()
-                cam.stop()
-                return
-
     finally:
         cam.stop()
 
 
 if __name__ == "__main__":
-    # onetime_run(getPurpleXYZ)
     continue_run(getPurpleXYZ)

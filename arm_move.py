@@ -7,21 +7,28 @@ from arm_inverse_kinematic import xyz2angle
 def xyz2Armangle(x, y, z):
     """
     The angle for what exactly the arm to move in degree.
-    See xyz2angle for more details of x y z input
+    See xyz2angle for more details of x y z from arm base
     """
-    angle = xyz2angle(x, y, z)
 
-    # The real arm init angle different from baseline
-    angle[0] += np.pi / 2
-    angle[2] += np.pi / 2
-    angle[3] -= np.pi * 3 / 2
-    angle = np.mod(angle, 2 * np.pi)
+    permu_th = np.stack([np.linspace(-np.pi / 4, -np.pi / 2, num=10),
+                         np.linspace(-np.pi / 4, 0,          num=10)]).T.flatten()
 
-    if np.any(angle < 0) or np.any(angle > np.pi) or np.any(np.isnan(angle)):
-        raise ValueError(str(angle) + "is out of working space")
+    for tht in permu_th:
+        angle = xyz2angle(x, y, z, last_angle=tht)
+        # The real arm init angle different from baseline
+        angle[0] += np.pi / 2
+        angle[2] += np.pi / 2
+        angle[3] -= np.pi * 3 / 2
+        angle = np.mod(angle, 2 * np.pi)
 
-    # rad to deg
-    return np.round(angle * 180 / np.pi).astype(np.int)
+        if np.any(angle > np.pi) or np.any(np.isnan(angle)):
+            pass
+            # raise ValueError(str(angle) + "is out of working space")
+        else:
+            # rad to deg
+            return np.round(angle * 180 / np.pi).astype(np.int)
+
+    raise ValueError(str(angle) + "is out of working space")
 
 
 def moveArmByXYZ(x, y, z, slow=False, pos_init=[90, 90, 90, 90]):

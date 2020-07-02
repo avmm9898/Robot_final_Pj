@@ -35,7 +35,7 @@ def linkTransform(al, a, d, th):
                      [    0,     0,   0,     1]])
 
 
-def getAC():
+def getTac():
     """ Custom transformarion from camera to arm base """
     b = -0.255  # x component of arm base, measured: -.2325
     w =  0.020  # y component of arm base, measured: .0235
@@ -60,31 +60,36 @@ DH = [
 ]
 
 
-def xyz2angle(x, y, z):
+def transAC(x, y, z):
     """
-    Read XYZ from camera and output 4 angles on some baseline
+    Read XYZ from Camera to XYZ from Arm base
+    """
+    P_TC = np.array([x / 1000, y / 1000, -z / 1000, 1])  # position vector of target in carema frame
+    P_AT = getTac().dot(P_TC)  # position vector of target in arm base frame
+    return P_AT[0], P_AT[1], P_AT[2]
+
+
+def xyz2angle(x, y, z, last_angle=-np.pi/4):
+    """
+    Read XYZ from arm base and output 4 angles.
 
     Parameters
     ===========
     X for forwarding
     Y for left
     Z for Upward
+    last_angle is the last joint angle. Default: -np.pi / 4 
     """
-    # input position from camera
-    # P_TC = np.array([x, y, z, 1])  # position vector of target in carema frame
-    # P_AC = getAC().dot(P_TC)  # position vector of target in arm base frame
-    P_AC = np.array([x, y, z, 1])
-
     # redefine it
     al0, a0, d1 = DH[0][:3]
     al1, a1, d2 = DH[1][:3]
     al2, a2, d3 = DH[2][:3]
     al3, a3, d4 = DH[3][:3]
     al4, a4, d5 = DH[4][:3]
+    X, Y, Z = x, y, z
 
     # output position from transformation
-    X, Y, Z = P_AC[:3]  # position in arm base frame
-    tht = -np.pi / 4  # last joint angle in arm base frame
+    tht = last_angle
 
     R15 = rotX(al1).dot(rotZ(tht))  # orientation of target in frame 1
 
