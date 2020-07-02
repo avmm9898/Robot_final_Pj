@@ -10,16 +10,19 @@ Insert the object into hole using robot(wheel and arm) with RGBD camera.
 * `arduino_connector.py`
     A python script that allow to communicate with arduino.
     The document of how to send command to arduino written here.
+* `control.py`
+    Some utility
+* `playYOLO.py`
+    Yolo related codes
 * `realsense_basic.py`
     Camera Object for reading colored image and depth image
 * `arm_inverse_kinematic.py`
-    Inverse kinematic
+    Calculate inverse kinematic
 * `arm_move.py`
-    The way to moving arm by xyz position
+    1. Moving arm by xyz position or by specific angle
+    2. Calculate the transform from camera
 * `arm_move_with_visual.py`
-    Read image and move the arm
-* `car_move_with_visual.py`
-    Read image and move the car
+    Detect object from image and move the arm
 * `car_move_with_visual.py`
     Read image and move the car
 * `/data`
@@ -28,8 +31,6 @@ Insert the object into hole using robot(wheel and arm) with RGBD camera.
     Put documents here
 * `main.py`
     The main function
-* `playYOLO.py`
-    Yolo related codes
 
 
 ## Requirement

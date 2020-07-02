@@ -1,8 +1,8 @@
 import serial
+from config import serial_port
 
 # init serial
-ser = serial.Serial("COM45", baudrate = 57600)
-#ser = serial.Serial("/dev/ttyACM0", 57600)
+ser = serial.Serial(serial_port, 57600)
 ser.close()
 speedtext = ""
 
@@ -121,7 +121,7 @@ def getArduinoSpeed():
     """
     Get Arduino Wheel speed
 
-    Returns 
+    Returns
     ------
     Speed: (Integer, Interger)
         The speed in mm of A and B motor

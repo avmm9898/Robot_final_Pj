@@ -35,20 +35,6 @@ def linkTransform(al, a, d, th):
                      [    0,     0,   0,     1]])
 
 
-def getTac():
-    """ Custom transformarion from camera to arm base """
-    b = -0.255  # x component of arm base, measured: -.2325
-    w =  0.020  # y component of arm base, measured: .0235
-    h =  0.265  # z component of arm base, measured: .2975
-    cam_angle = 7
-    th_y = cam_angle * np.pi / 180 - 1 * np.pi / 2 # rotation about x axis
-    th_z = -np.pi / 2                              # rotation about z axis
-    r = np.zeros([4, 4])
-    r[:3, :3] = rotY(th_y).dot(rotZ(th_z))
-    r[:, 3] = [b, w, h, 1]
-    return r
-
-
 # Custom DH table
 DH = [
     # alpha a d theta
@@ -58,15 +44,6 @@ DH = [
     [0,   0.105,    0, None],
     [0,   0.127,    0,    0],  # end-effector add here
 ]
-
-
-def transAC(x, y, z):
-    """
-    Read XYZ from Camera to XYZ from Arm base
-    """
-    P_TC = np.array([x / 1000, y / 1000, -z / 1000, 1])  # position vector of target in carema frame
-    P_AT = getTac().dot(P_TC)  # position vector of target in arm base frame
-    return P_AT[0], P_AT[1], P_AT[2]
 
 
 def xyz2angle(x, y, z, last_angle=-np.pi/4):

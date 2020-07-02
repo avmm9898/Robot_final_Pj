@@ -3,9 +3,7 @@ import cv2
 import numpy as np
 import pyrealsense2 as rs
 
-from realsense_basic import Camera
-from arm_inverse_kinematic import transAC, xyz2angle
-from arm_move import xyz2Armangle
+from arm_move import Arm
 
 
 def purple_detect(color_image):
@@ -35,64 +33,56 @@ def purple_detect(color_image):
     box = stats[idx]
     # center = centroids[idx].astype(np.int)
     center = np.array([box[0] + box[2] // 2, box[1] + box[3] // 2])
-    # print("center and box", center, box)
+    print("center and box", center, box)
     return center, box
 
 
-def getPurpleXYZ(cam, color_image, depth_image):
-    """ Get object XYZ from Image """
+def getPurpleXYD(color_image, depth_image):
+    # detect
     center, box = purple_detect(color_image)
     if center is None:
         return None
-
-    # get real xyz
-    d = depth_image[center[1]-1:center[1]+2, center[0]-1:center[0]+2].mean()
-    xyz = cam.getXYZ(center[1], center[0], d)
-    # print("xyd", f"{center[0]:04.0f} {center[1]:04.0f} {d:04.0f}",
-    #       "xyz", f"{xyz[0]:04.0f} {xyz[1]:04.0f} {xyz[2]:04.0f}")
 
     # plot bounding box
     cv2.rectangle(color_image, tuple(box[:2]), tuple(box[:2] + box[2:4]), (0, 255, 0), 2)
     cv2.rectangle(color_image, tuple(center - 1), tuple(center + 1), (255, 0, 0), 2)
 
-    return xyz
+    # get real xyz
+    d = depth_image[center[1]-1:center[1]+2, center[0]-1:center[0]+2].mean()
+    return [center[1], center[0], d]
 
 
-def continue_run(func):
-    """ Run forever for debug """
+def getPurpleXYZ(cam, color_image, depth_image):
+    """ Get object XYZ from Image """
+    # init
+    depth_colormap = cv2.applyColorMap(cv2.convertScaleAbs(depth_image, alpha=0.03),
+                                       cv2.COLORMAP_JET)
+    images = np.hstack([depth_colormap, color_image])
+
+    # get xyd and xyz
+    xyd = getPurpleXYD(color_image, depth_image)
+    if xyd is None:
+        return False, images
+    xyz = cam.getXYZ(*xyd)
+
+    print("xyd", f"{xyd[0]:04.0f} {xyd[1]:04.0f} {xyd[2]:04.0f}",
+          "xyz", f"{xyz[0]:04.0f} {xyz[1]:04.0f} {xyz[2]:04.0f}")
+
+    # get arm xyz
+    axyz = Arm.xyzFromCamera(*xyz)
+    print("arm xyz", f"{axyz[0]:.03f} {axyz[1]:.03f} {axyz[2]:.03f}")
+
+    # get arm angle
     try:
-        cam = Camera()
+        angle = Arm.xyz2Angle(*axyz)
+        print("Angle", angle)
+    except ValueError as e:
+        print(e)
 
-        while True:
-            color_image, depth_image = cam.read()
-            if color_image is None or depth_image is None:
-                return
-            depth_colormap = cv2.applyColorMap(cv2.convertScaleAbs(depth_image, alpha=0.03), cv2.COLORMAP_JET)
-
-            xyz = func(cam, color_image, depth_image)
-            if xyz is not None:
-                axyz = transAC(*xyz)
-                print("arm xyz", f"{axyz[0]:.03f} {axyz[1]:.03f} {axyz[2]:.03f}")
-                try:
-                    angle = xyz2Armangle(*axyz)
-                    print("Angle", angle)
-                except ValueError as e:
-                    print(e)
-
-            # draw box on it
-            images = np.hstack([depth_colormap, color_image])
-
-            # Show images
-            cv2.namedWindow('RealSense', cv2.WINDOW_AUTOSIZE)
-            cv2.imshow('RealSense', images)
-            key = cv2.waitKey(100)
-            if key & 0xFF == ord('q') or key == 27:
-                cv2.destroyAllWindows()
-                break
-            time.sleep(0.1)
-    finally:
-        cam.stop()
+    images = np.hstack([depth_colormap, color_image])
+    return False, images
 
 
 if __name__ == "__main__":
-    continue_run(getPurpleXYZ)
+    from control import continueRun
+    continueRun(getPurpleXYZ)
