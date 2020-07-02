@@ -13,7 +13,7 @@ def purple_detect(color_image):
     # get purple color
     hsv = cv2.cvtColor(color_image, cv2.COLOR_BGR2HSV)
     lower_purple = np.array([120, 20, 50])
-    upper_purple = np.array([160, 80, 155])
+    upper_purple = np.array([160, 80, 185])
     mask = cv2.inRange(hsv, lower_purple, upper_purple)
 
     # group purple area

@@ -17,7 +17,7 @@ import pyrealsense2 as rs
 
 # XYZ
 from test_detect_xyz import getPurpleXYZ
-from arm_move import moveArmByXYZ
+from arm_move import moveArmByAngle, moveArmByXYZ
 from arduino_connector import setArduinoArm
 
 # camera
@@ -25,8 +25,8 @@ from realsense_basic import Camera
 from arm_inverse_kinematic import transAC
 
 
-now_pos = [90, 90, 90, 90]
-pre_xyz = now_pos
+now_angle = [90, 90, 90, 90]
+pre_xyz = now_angle
 try:
     # read
     cam = Camera()
@@ -41,7 +41,7 @@ try:
             print("Go", want_xyz)
             try:
                 pre_xyz = want_xyz
-                now_pos = moveArmByXYZ(*want_xyz, slow=True, pos_init=now_pos)
+                now_angle = moveArmByXYZ(*want_xyz, angle_init=now_angle)
             except ValueError as e:
                 print(e)
 
@@ -61,14 +61,11 @@ try:
 
         # more away arm
         if key & 0xFF == ord('0'):
-            for i in range(4):
-                setArduinoArm(i, 90)
-            time.sleep(1)
-
-            now_pos = [0, 0, 90, 90]
-            for i in range(4):
-                setArduinoArm(i, now_pos[i])
-                time.sleep(0.5)
+            moveArmByAngle([90, 90, 90, 90], angle_init=now_angle)
+            now_angle = [0, 0, 90, 90]
+            setArduinoArm(0, 0)
+            time.sleep(0.1)
+            moveArmByAngle(now_angle, angle_init=[0,90,90,90])
 
         if key & 0xFF == ord('s'):
             open("test1", "a").write(str(np.stack([want_xyz, xyz, axyz]).flatten()))
@@ -80,4 +77,5 @@ try:
             break
 
 finally:
+    moveArmByAngle([90, 90, 90, 90], angle_init=now_angle)
     cam.stop()

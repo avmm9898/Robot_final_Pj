@@ -13,6 +13,8 @@ def xyz2Armangle(x, y, z):
     permu_th = np.stack([np.linspace(-np.pi / 4, -np.pi / 2, num=10),
                          np.linspace(-np.pi / 4, 0,          num=10)]).T.flatten()
 
+    y -= 0.03
+    z += 0.01
     for tht in permu_th:
         angle = xyz2angle(x, y, z, last_angle=tht)
         # The real arm init angle different from baseline
@@ -31,25 +33,28 @@ def xyz2Armangle(x, y, z):
     raise ValueError(str(angle) + "is out of working space")
 
 
-def moveArmByXYZ(x, y, z, slow=False, pos_init=[90, 90, 90, 90]):
+def moveArmByAngle(angles, slow=True, angle_init=[90, 90, 90, 90]):
+    if not slow:
+        for i in range(4):
+            setArduinoArm(i, angles[i])
+    else:
+        for i in range(4):
+            setArduinoArm(i, int(angle_init[i]))
+        ang = np.linspace(angle_init, angles, num=10)
+        for a in ang:
+            for i in range(4):
+                setArduinoArm(i, int(a[i]))
+                time.sleep(0.001)
+
+
+def moveArmByXYZ(x, y, z, slow=True, angle_init=[90, 90, 90, 90]):
     """ Give xyz then move arm """
     # get angle for arm
     ths = xyz2Armangle(x, y, z)
 
     # set arm angle
-    if not slow:
-        for i in range(4):
-            setArduinoArm(i, ths[i])
-    else:
-        for i in range(4):
-            setArduinoArm(i, int(pos_init[i]))
-        pos_targ = np.array(ths)
-        pos = np.linspace(pos_init, pos_targ, num=10)
-        for p in pos:
-            for i in range(4):
-                setArduinoArm(i, int(p[i]))
-                time.sleep(0.001)
-    return np.array(ths, dtype=np.int)
+    moveArmByAngle(ths, slow=slow, angle_init=angle_init)
+    return ths
 
 
 if __name__ == "__main__":
