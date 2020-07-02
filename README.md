@@ -25,12 +25,14 @@ Insert the object into hole using robot(wheel and arm) with RGBD camera.
     Detect object from image and move the arm
 * `car_move_with_visual.py`
     Read image and move the car
+* `main.py`
+    The main function that move the car to platform and move the arm to it
+* `config.py`
+    The config file. e.g. serial port
 * `/data`
     Put non-code data here
 * `/doc`
     Put documents here
-* `main.py`
-    The main function
 
 
 ## Requirement

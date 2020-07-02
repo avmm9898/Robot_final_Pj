@@ -2,8 +2,9 @@ import pyrealsense2 as rs
 import numpy as np
 import cv2
 
+from config import image_shape
+
 # Custom data
-image_shape = np.array((640, 480), dtype=np.int)
 scale = 170 / 640
 focus = 150
 fps = 30

@@ -1,147 +1,124 @@
-import time
 import cv2
 import numpy as np
 import threading
-from functools import partial
 
-from realsense_basic import run
-from arduino_connector import setArduinoCar, setArduinoArm
-from playYOLO import YOLO
+from arduino_connector import setArduinoCar
+from config import image_shape
 
 # init
-image_shape = np.array((640, 480))
 thr = threading.Thread(target=lambda: print("Start Thread"))
 thr.start()
 depth_moving_window = [999] * 5  # the array for moving average
 
 
-def example_detect(color_image, depth_image):
-    """ Example detecting code """
-    hsv = cv2.cvtColor(color_image, cv2.COLOR_BGR2HSV)
-    lower_red = np.array([0,100,100])
-    upper_red = np.array([10,255,255])
-    mask = cv2.inRange(hsv, lower_red, upper_red)
-    lower_red = np.array([175,100,100])
-    upper_red = np.array([190,255,255])
-    mask = cv2.bitwise_or(mask, cv2.inRange(hsv, lower_red, upper_red))
-    mask_xy = np.where(mask)
-    if len(mask_xy[0]):
-        center = np.flip(np.mean(mask_xy, axis=1))
-        width = np.array([20, 20])
+def carApproach(IMG_x, IMG_y, d):
+    """ Custom deceision """
+    # init
+    global thr
+    if thr.is_alive():
+        return False
+    is_ok = False
+
+    if d <= 600:
+        is_ok = True
     else:
-        print(mask_xy)
-        center = image_shape / 2
-        width = image_shape / 16
+        if IMG_x > image_shape[0] / 2 + 30:
+            thr = threading.Thread(target=setArduinoCar, args=('R', 150, 1))
+        elif IMG_x < image_shape[0] / 2 - 30:
+            thr = threading.Thread(target=setArduinoCar, args=('L', 150, 1))
+        else:
+            thr = threading.Thread(target=setArduinoCar, args=('F', 120, 2))
+        thr.start()
 
-    # draw center
-    tl = (center - width).astype(np.int)
-    br = (center + width).astype(np.int)
-    cv2.rectangle(color_image, tuple(tl), tuple(br), (0, 255, 0), 2)
-    return [center]
+    return is_ok
 
 
-def detectAndGo(func_detect, color_image, depth_image):
-    """ Custom detect method """
+def carApproachMinor(IMG_x, IMG_y, d):
+    """ Custom deceision1 """
+    # init
+    global thr
+    if not thr.is_alive():
+        return False
+    is_ok = False
+
+    if d <= 510 and d >= 480:
+        while(True):
+            if mean_x > image_shape[0] / 2 + 30:
+                thr = threading.Thread(target=setArduinoCar, args=('R', 125, 1))
+            elif mean_y < image_shape[0] / 2 - 30:
+                thr = threading.Thread(target=setArduinoCar, args=('L', 125, 1))
+            else:
+                break
+        is_ok = True
+        print("true")
+    elif d < 480:
+        thr = threading.Thread(target=setArduinoCar, args=('B', 120, 1))
+        thr.start()
+    else:
+        """
+        if mean_x > image_shape[0] / 2 + 50:
+            thr = threading.Thread(target=setArduinoCar, args=('R', 150, 1))
+        elif mean_y < image_shape[0] / 2 - 50:
+            thr = threading.Thread(target=setArduinoCar, args=('L', 150, 1))
+        else:"""
+        thr = threading.Thread(target=setArduinoCar, args=('F', 120, 1))
+        thr.start()
+
+    return is_ok
+
+
+def detectAndApproach(cam, color_image, depth_image,
+                      arm, func_detect, func_approach):
+    """ Detect the object and approach it """
     # detect
-    depth_colormap = cv2.applyColorMap(cv2.convertScaleAbs(depth_image, alpha=0.3), cv2.COLORMAP_JET)
-    centers = func_detect(color_image)
-    IMG_x=320
-    IMG_y=240
+    centers = func_detect(color_image, depth_image)
 
-    if len(centers)>0:
-        for i in centers:
-            IMG_x=int(i[0])
-            IMG_y=int(i[1])
+    # Average all center of bounding boxes
+    if len(centers):
+        IMG_x = int(np.mean([i[0] for i in centers]))
+        IMG_y = int(np.mean([i[1] for i in centers]))
+    else:
+        IMG_x, IMG_y = image_shape // 2
 
     # get depth
     d = depth_image[IMG_y-50:IMG_y+50, IMG_x-50:IMG_x+50].mean()
 
+    # average depth
     global depth_moving_window
     depth_moving_window = depth_moving_window[1:] + [d]
-    d=np.mean(depth_moving_window)
+    d = np.mean(depth_moving_window)
 
     # walk(Run command in threading)
-    global thr
     print(d, (IMG_x, IMG_y), thr)
-
-    is_ok = False  # Terminated
-    if not thr.is_alive():
-        
-        if d <= 600:
-            is_ok = True
-        else:
-            if IMG_x > image_shape[0] / 2 + 30:
-                thr = threading.Thread(target=setArduinoCar, args=('R', 150, 1))
-            elif IMG_x < image_shape[0] / 2 - 30:
-                thr = threading.Thread(target=setArduinoCar, args=('L', 150, 1))
-            else:
-                thr = threading.Thread(target=setArduinoCar, args=('F', 120, 2))
-            thr.start()
+    is_ok = func_approach(IMG_x, IMG_y, d)
 
     # plot it
-    depth_colormap = cv2.applyColorMap(cv2.convertScaleAbs(depth_image, alpha=0.03), cv2.COLORMAP_JET)
+    depth_colormap = cv2.applyColorMap(cv2.convertScaleAbs(depth_image, alpha=0.03),
+                                       cv2.COLORMAP_JET)
     return is_ok, np.hstack([depth_colormap, color_image])
-
-def MinorApproach(func_detect, color_image, depth_image):
-    # detect
-    depth_colormap = cv2.applyColorMap(cv2.convertScaleAbs(depth_image, alpha=0.3), cv2.COLORMAP_JET)
-    centers = func_detect(color_image)
-    mean_x=0
-    mean_y=0
-
-    if len(centers)>0:
-        for i in centers:
-            mean_x+=int(i[0]/len(centers))
-            mean_y+=int(i[1]/len(centers))
-
-    # get depth
-    d = depth_image[mean_y-50:mean_y+50, mean_x-50:mean_x+50].mean()
-
-    global depth_moving_window
-    depth_moving_window = depth_moving_window[1:] + [d]
-    d=np.mean(depth_moving_window)
-
-    # walk(Run command in threading)
-    global thr
-    print(d, mean_x, mean_y)
-
-    is_ok = False  # Terminated
-    if not thr.is_alive():
-        if d <= 510 and d >=480:
-            while(True):
-                if mean_x > image_shape[0] / 2 + 30:
-                    thr = threading.Thread(target=setArduinoCar, args=('R', 125, 1))
-                elif mean_y < image_shape[0] / 2 - 30:
-                    thr = threading.Thread(target=setArduinoCar, args=('L', 125, 1))
-                else:
-                    break
-            is_ok = True
-            print("true")
-        elif d < 480:
-            thr = threading.Thread(target=setArduinoCar, args=('B', 120, 1))
-            thr.start()
-        else:
-            """
-            if mean_x > image_shape[0] / 2 + 50:
-                thr = threading.Thread(target=setArduinoCar, args=('R', 150, 1))
-            elif mean_y < image_shape[0] / 2 - 50:
-                thr = threading.Thread(target=setArduinoCar, args=('L', 150, 1))
-            else:"""
-            thr = threading.Thread(target=setArduinoCar, args=('F', 120, 1))
-            thr.start()
-
-    # plot it
-    depth_colormap = cv2.applyColorMap(cv2.convertScaleAbs(depth_image, alpha=0.03), cv2.COLORMAP_JET)
-    return is_ok, np.hstack([depth_colormap, color_image])
-
 
 
 if __name__ == "__main__":
-    net = YOLO("platform_tiny", 0.3)
+    from functools import partial
+    from test_detect_xyz import getPurpleXYD
+    from playYOLO import YOLO
+    from control import continueRun
+    from arm_move import Arm
+    import time
+
+    def example_detect(color_image, depth_image):
+        """ Example detecting code """
+        xyd = getPurpleXYD(color_image, depth_image)
+        if xyd is None:
+            return []
+        return [[xyd[1], xyd[0]]]
+
+    arm = Arm()
+    arm.hide()
+    time.sleep(1)
+    # net = YOLO("platform_tiny", 0.3)
     # net = YOLO("yolov3_hole", 0.8)
-    setArduinoArm(0, 0)
-    time.sleep(1)
-    setArduinoArm(1, 0)
-    time.sleep(1)
-    run(partial(detectAndGo, net.detect))
-    # run(partial(detectAndGo, example_detect))
+    continueRun(partial(detectAndApproach,
+                        arm=arm,
+                        func_detect=example_detect,
+                        func_approach=carApproach))

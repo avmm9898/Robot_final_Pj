@@ -13,25 +13,24 @@ After click s, it will save the data into `test1` file.
 import time
 import cv2
 import numpy as np
-import pyrealsense2 as rs
 
 # XYZ
-from test_detect_xyz import getPurpleXYZ
-from arm_move import moveArmByAngle, moveArmByXYZ
-from arduino_connector import setArduinoArm
+from test_detect_xyz import getPurpleXYD
+from arm_move import Arm
 
 # camera
 from realsense_basic import Camera
-from arm_inverse_kinematic import transAC
 
 
-now_angle = [90, 90, 90, 90]
-pre_xyz = now_angle
+pre_xyz = [0, 0, 0]
 try:
-    # read
+    # init
     cam = Camera()
+    arm = Arm()
+    arm.hide()
 
     while True:
+        # read
         color_image, depth_image = cam.read()
         if color_image is None or depth_image is None:
             continue
@@ -41,19 +40,21 @@ try:
             print("Go", want_xyz)
             try:
                 pre_xyz = want_xyz
-                now_angle = moveArmByXYZ(*want_xyz, angle_init=now_angle)
+                arm.moveByXYZ(*want_xyz)
             except ValueError as e:
                 print(e)
 
-        xyz = getPurpleXYZ(cam, color_image, depth_image)
-        if xyz is None:
+        xyd = getPurpleXYD(color_image, depth_image)
+        if xyd is None:
             continue
 
-        axyz = transAC(*xyz)
+        xyz = cam.getXYZ(*xyd)
+        axyz = Arm.xyzFromCamera(*xyz)
         print("arm xyz", f"{axyz[0]:.03f} {axyz[1]:.03f} {axyz[2]:.03f}")
 
         # Show images
-        depth_colormap = cv2.applyColorMap(cv2.convertScaleAbs(depth_image, alpha=0.03), cv2.COLORMAP_JET)
+        depth_colormap = cv2.applyColorMap(cv2.convertScaleAbs(depth_image, alpha=0.03),
+                                           cv2.COLORMAP_JET)
         images = np.hstack([depth_colormap, color_image])
         cv2.namedWindow('RealSense', cv2.WINDOW_AUTOSIZE)
         cv2.imshow('RealSense', images)
@@ -61,11 +62,8 @@ try:
 
         # more away arm
         if key & 0xFF == ord('0'):
-            moveArmByAngle([90, 90, 90, 90], angle_init=now_angle)
-            now_angle = [0, 0, 90, 90]
-            setArduinoArm(0, 0)
-            time.sleep(0.1)
-            moveArmByAngle(now_angle, angle_init=[0,90,90,90])
+            arm.moveByAngle([0, 90, 90, 90])
+            arm.hide()
 
         if key & 0xFF == ord('s'):
             open("test1", "a").write(str(np.stack([want_xyz, xyz, axyz]).flatten()))
@@ -77,5 +75,4 @@ try:
             break
 
 finally:
-    moveArmByAngle([90, 90, 90, 90], angle_init=now_angle)
     cam.stop()

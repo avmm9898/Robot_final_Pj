@@ -33,8 +33,8 @@ class Arm:
         w =  0.020  # y component of arm base, measured: .0235
         h =  0.265  # z component of arm base, measured: .2975
         cam_angle = 7  # camera yoll angle
-        th_y = cam_angle * np.pi / 180 - 1 * np.pi / 2 # rotation about x axis
-        th_z = -np.pi / 2                              # rotation about z axis
+        th_y = cam_angle * np.pi / 180 - 1 * np.pi / 2  # rotation about x axis
+        th_z = -np.pi / 2                               # rotation about z axis
         T_AC = np.zeros([4, 4])
         T_AC[:3, :3] = rotY(th_y).dot(rotZ(th_z))
         T_AC[:, 3] = [b, w, h, 1]

@@ -3,7 +3,7 @@ import time
 import argparse
 import cv2
 import numpy as np
-from realsense_basic import run
+from control import continueRunSimple
 
 
 class YOLO():
@@ -113,4 +113,4 @@ if __name__ == "__main__":
             return False, np.hstack((depth_colormap, color_image))
         return test
 
-    run(runNet(net))
+    continueRunSimple(runNet(net))

@@ -1,15 +1,8 @@
 import time
 import cv2
 import numpy as np
-import pyrealsense2 as rs
 
-from functools import partial
-from realsense_basic import Camera
-from playYOLO import YOLO
 from arm_move import Arm
-
-
-debug = True
 
 
 def yoloDetect(func_detect, color_image, depth_image):
@@ -33,7 +26,7 @@ def yoloDetect(func_detect, color_image, depth_image):
 
 
 def detectAndInsert(cam, arm, func, multiple=False):
-    """ 
+    """
     Detect Image by custom function and Insert by arm.
 
     Set multiple=True if you want to insert multiple times
@@ -84,6 +77,10 @@ def detectAndInsert(cam, arm, func, multiple=False):
 
 if __name__ == "__main__":
     from test_detect_xyz import getPurpleXYD
+    from playYOLO import YOLO
+    from functools import partial
+    from realsense_basic import Camera
+
     try:
         cam = Camera()
         arm = Arm()

@@ -52,7 +52,7 @@ def getPurpleXYD(color_image, depth_image):
     return [center[1], center[0], d]
 
 
-def getPurpleXYZ(cam, color_image, depth_image):
+def purpleMain(cam, color_image, depth_image):
     """ Get object XYZ from Image """
     # init
     depth_colormap = cv2.applyColorMap(cv2.convertScaleAbs(depth_image, alpha=0.03),
@@ -85,4 +85,4 @@ def getPurpleXYZ(cam, color_image, depth_image):
 
 if __name__ == "__main__":
     from control import continueRun
-    continueRun(getPurpleXYZ)
+    continueRun(purpleMain)

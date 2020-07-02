@@ -38,7 +38,7 @@ def linkTransform(al, a, d, th):
 # Custom DH table
 DH = [
     # alpha a d theta
-    [0      , 0, 0.08, None],
+    [      0, 0, 0.08, None],
     [np.pi/2, 0,    0, None],
     [0,   0.115,    0, None],
     [0,   0.105,    0, None],
@@ -55,7 +55,7 @@ def xyz2angle(x, y, z, last_angle=-np.pi/4):
     X for forwarding
     Y for left
     Z for Upward
-    last_angle is the last joint angle. Default: -np.pi / 4 
+    last_angle is the last joint angle. Default: -np.pi / 4
     """
     # redefine it
     al0, a0, d1 = DH[0][:3]
