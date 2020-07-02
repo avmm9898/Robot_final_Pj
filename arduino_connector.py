@@ -1,8 +1,8 @@
 import serial
 
 # init serial
-# ser = serial.Serial("COM45", baudrate = 57600)
-ser = serial.Serial("/dev/ttyACM0", 57600)
+ser = serial.Serial("COM45", baudrate = 57600)
+#ser = serial.Serial("/dev/ttyACM0", 57600)
 ser.close()
 speedtext = ""
 

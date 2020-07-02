@@ -14,7 +14,8 @@ def xyz2Armangle(x, y, z):
                          np.linspace(-np.pi / 4, 0,          num=10)]).T.flatten()
 
     y -= 0.03
-    z += 0.01
+    z -= 0.09
+    #x += 0.03
     for tht in permu_th:
         angle = xyz2angle(x, y, z, last_angle=tht)
         # The real arm init angle different from baseline

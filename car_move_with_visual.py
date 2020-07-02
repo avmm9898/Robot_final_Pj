@@ -54,11 +54,11 @@ def detectAndGo(func_detect, color_image, depth_image):
             IMG_y=int(i[1])
 
     # get depth
-    d = depth_image[IMG_x-50:IMG_x+50, IMG_y-50:IMG_y+50].mean()
+    d = depth_image[IMG_y-50:IMG_y+50, IMG_x-50:IMG_x+50].mean()
 
-    global depth_avg
-    depth_avg = depth_avg[1:] + [d]
-    d=np.mean(depth_avg)
+    global depth_moving_window
+    depth_moving_window = depth_moving_window[1:] + [d]
+    d=np.mean(depth_moving_window)
 
     # walk(Run command in threading)
     global thr
@@ -67,12 +67,12 @@ def detectAndGo(func_detect, color_image, depth_image):
     is_ok = False  # Terminated
     if not thr.is_alive():
         
-        if d <= 380:
+        if d <= 600:
             is_ok = True
         else:
             if IMG_x > image_shape[0] / 2 + 30:
                 thr = threading.Thread(target=setArduinoCar, args=('R', 150, 1))
-            elif IMG_x < image_shape[0] / 2 - 70:
+            elif IMG_x < image_shape[0] / 2 - 30:
                 thr = threading.Thread(target=setArduinoCar, args=('L', 150, 1))
             else:
                 thr = threading.Thread(target=setArduinoCar, args=('F', 120, 2))
@@ -95,7 +95,7 @@ def MinorApproach(func_detect, color_image, depth_image):
             mean_y+=int(i[1]/len(centers))
 
     # get depth
-    d = depth_image[IMG_x-20:IMG_x+20, IMG_y-20:IMG_y+20].mean()
+    d = depth_image[mean_y-50:mean_y+50, mean_x-50:mean_x+50].mean()
 
     global depth_moving_window
     depth_moving_window = depth_moving_window[1:] + [d]
@@ -103,23 +103,31 @@ def MinorApproach(func_detect, color_image, depth_image):
 
     # walk(Run command in threading)
     global thr
-    print(d, (mean_x, mean_y), thr)
+    print(d, mean_x, mean_y)
 
     is_ok = False  # Terminated
     if not thr.is_alive():
-        
-        if d <= 400 and d >=350:
+        if d <= 510 and d >=480:
+            while(True):
+                if mean_x > image_shape[0] / 2 + 30:
+                    thr = threading.Thread(target=setArduinoCar, args=('R', 125, 1))
+                elif mean_y < image_shape[0] / 2 - 30:
+                    thr = threading.Thread(target=setArduinoCar, args=('L', 125, 1))
+                else:
+                    break
             is_ok = True
-        elif d <= 350:
+            print("true")
+        elif d < 480:
             thr = threading.Thread(target=setArduinoCar, args=('B', 120, 1))
             thr.start()
         else:
-            if mean_x > image_shape[0] / 2 + 30:
+            """
+            if mean_x > image_shape[0] / 2 + 50:
                 thr = threading.Thread(target=setArduinoCar, args=('R', 150, 1))
-            elif mean_y < image_shape[0] / 2 - 70:
+            elif mean_y < image_shape[0] / 2 - 50:
                 thr = threading.Thread(target=setArduinoCar, args=('L', 150, 1))
-            else:
-                thr = threading.Thread(target=setArduinoCar, args=('F', 120, 1))
+            else:"""
+            thr = threading.Thread(target=setArduinoCar, args=('F', 120, 1))
             thr.start()
 
     # plot it

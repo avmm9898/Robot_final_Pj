@@ -33,7 +33,7 @@ class YOLO():
     # !!! 此函式從輸出層獲得每個目標在圖片裡的座標，然後對每個目標分類
     def postprocess(self, frame, outs, orgFrame):
         # 用openCV畫畫的函式，畫了一個框框和寫了LABEL上去
-        def drawPred(classId, conf, left, top, right, bottom, orgFrame):
+        def drawPred(classId, conf, left, top, right, bottom, orgFrame,count):
             # 標籤和框框的參數
             fontSize = 0.35
             fontBold = 1
@@ -43,7 +43,7 @@ class YOLO():
             # --------------------------------------------------------
 
             label = '%.2f' % conf
-            labelName = '%s:%s' % (self.classes[classId], label)
+            labelName = '%s,%s:%s' % (self.classes[classId],count, label)
 
             classtype = self.classes[classId]
 
@@ -78,16 +78,17 @@ class YOLO():
 
         indices = cv2.dnn.NMSBoxes(boxes, confidences, self.confThreshold, nmsThreshold)  # 這裡就用到了NMS，如果目標被重複框選，就會消成一個
         centers = []
-
-        for i in indices:
+        count=0
+        for i in indices:      
             i = i[0]
             box = boxes[i]
             left = box[0]
             top = box[1]
             width = box[2]
             height = box[3]
-            drawPred(classIds[i], confidences[i], left, top, left + width, top + height, orgFrame)
+            drawPred(classIds[i], confidences[i], left, top, left + width, top + height, orgFrame,count)
             centers.append([left + width/2, top + height/2])
+            count+=1
         return centers
 
     def detect(self, color_image):

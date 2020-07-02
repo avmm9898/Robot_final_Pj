@@ -6,6 +6,8 @@ import pyrealsense2 as rs
 from functools import partial
 from realsense_basic import Camera
 from arm_inverse_kinematic import transAC
+from playYOLO import YOLO
+from arm_move import moveArmByXYZ, moveArmByAngle
 
 
 debug = True
@@ -71,44 +73,16 @@ def YoloDetect_xyz(cam, func_detect, color_image, depth_image):
             mean_y+=int(i[1]/len(centers))
 
         # get depth
-        d = depth_image[mean_x-20:mean_x+20, mean_y-20:mean_y+20].mean()
+        d = depth_image[mean_y-20:mean_y+20, mean_x-20:mean_x+20].mean()
         
         # walk(Run command in threading)
         for i in centers:
-            xyz.append(cam.getXYZ(i[0], i[1], d))
+            xyz.append(cam.getXYZ(i[1], i[0], d))
         print(xyz)
     return xyz
 
 
 
-def continue_run(func):
-    """ Run forever for debug """
-    try:
-        cam = Camera()
-
-        while True:
-            color_image, depth_image = cam.read()
-            if color_image is None or depth_image is None:
-                return
-            depth_colormap = cv2.applyColorMap(cv2.convertScaleAbs(depth_image, alpha=0.03), cv2.COLORMAP_JET)
-
-            xyz = func(cam, color_image, depth_image)
-            if xyz is not None:
-                axyz = transAC(*xyz)
-                print("arm xyz", f"{axyz[0]:.03f} {axyz[1]:.03f} {axyz[2]:.03f}")
-
-            # draw box on it
-            images = np.hstack([depth_colormap, color_image])
-
-            # Show images
-            cv2.namedWindow('RealSense', cv2.WINDOW_AUTOSIZE)
-            cv2.imshow('RealSense', images)
-            key = cv2.waitKey(100)
-            if key & 0xFF == ord('q') or key == 27:
-                cv2.destroyAllWindows()
-                break
-    finally:
-        cam.stop()
 
 
 def onetime_run(func):
@@ -118,43 +92,49 @@ def onetime_run(func):
         xyzs = []
 
         # wait for stable the image
-        for i in range(10):
+        for i in range(5):
             color_image, depth_image = cam.read()
+   
+            # Show images
             if color_image is None or depth_image is None:
-                continue
-            time.sleep(0.1)
+                return
+            depth_colormap = cv2.applyColorMap(cv2.convertScaleAbs(depth_image, alpha=0.03), cv2.COLORMAP_JET)
+            xyzs = YoloDetect_xyz(cam, func, color_image, depth_image)
 
-            # collect xyz
-            xyz = func(cam, color_image, depth_image)
-            if xyz is None:
-                continue
-            xyzs.append(xyz)
-
-            # debug
-            if debug:
-                depth_colormap = cv2.applyColorMap(cv2.convertScaleAbs(depth_image, alpha=0.03), cv2.COLORMAP_JET)
-                images = np.hstack([depth_colormap, color_image])
-                cv2.namedWindow('RealSense', cv2.WINDOW_AUTOSIZE)
-                cv2.imshow('RealSense', images)
-                key = cv2.waitKey(1)
-
-        # get xyz and move the arm
-        xyz = np.mean(xyzs, axis=0)
-        if not debug:
-            print(xyz)
-        moveArmByXYZ(*xyz)
-
-        # Show images
-        if debug:
+            images = np.hstack([depth_colormap, color_image])
+            
+            cv2.namedWindow('RealSense', cv2.WINDOW_AUTOSIZE)
+            cv2.imshow('RealSense', images)
+            key = cv2.waitKey(10)
             if key & 0xFF == ord('q') or key == 27:
                 cv2.destroyAllWindows()
-                cam.stop()
-                return
+                break
+            time.sleep(0.1)
+            
+        moveArmByAngle([90,90,90,90], angle_init=[0,0,90,90])
+
+        for xyz in xyzs:
+            if xyz is not None:
+                axyz = transAC(*xyz)
+                print("arm xyz", f"{axyz[0]:.03f} {axyz[1]:.03f} {axyz[2]:.03f}")
+                try:
+                    #angle = xyz2Armangle(*axyz)
+                    #print("Angle", angle)
+                    time.sleep(1)
+                    moveArmByXYZ(*axyz)
+                    time.sleep(1)
+                except ValueError as e:
+                    print(e)
+            
+        # draw box on it
+        images = np.hstack([depth_colormap, color_image])
 
     finally:
         cam.stop()
 
 
 if __name__ == "__main__":
-    # onetime_run(getPurpleXYZ)
-    continue_run(getPurpleXYZ)
+    hole_net=YOLO("yolov3_hole",0.8)
+    moveArmByAngle([0,0,90,90])
+    onetime_run(hole_net.detect)
+    #continue_run(getPurpleXYZ)
