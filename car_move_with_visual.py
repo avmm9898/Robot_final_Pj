@@ -45,7 +45,7 @@ def carApproachMinor(IMG_x, IMG_y, d):
         while(True):
             if mean_x > image_shape[0] / 2 + 30:
                 thr = threading.Thread(target=setArduinoCar, args=('R', 125, 1))
-            elif mean_y < image_shape[0] / 2 - 30:
+            elif mean_x < image_shape[0] / 2 - 30:
                 thr = threading.Thread(target=setArduinoCar, args=('L', 125, 1))
             else:
                 break
@@ -55,12 +55,7 @@ def carApproachMinor(IMG_x, IMG_y, d):
         thr = threading.Thread(target=setArduinoCar, args=('B', 120, 1))
         thr.start()
     else:
-        """
-        if mean_x > image_shape[0] / 2 + 50:
-            thr = threading.Thread(target=setArduinoCar, args=('R', 150, 1))
-        elif mean_y < image_shape[0] / 2 - 50:
-            thr = threading.Thread(target=setArduinoCar, args=('L', 150, 1))
-        else:"""
+
         thr = threading.Thread(target=setArduinoCar, args=('F', 120, 1))
         thr.start()
 
