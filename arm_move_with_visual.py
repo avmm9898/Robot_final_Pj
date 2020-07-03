@@ -34,7 +34,7 @@ def detectAndInsert(cam, arm, func, multiple=False):
     # wait for stable the image, get the last one
     xyds = []
     c = 0
-    while c < 5:
+    while c < 10:
         color_image, depth_image = cam.read()
         if color_image is None or depth_image is None:
             time.sleep(0.1)
@@ -68,7 +68,8 @@ def detectAndInsert(cam, arm, func, multiple=False):
         axyz = Arm.xyzFromCamera(*xyz)
         print("arm xyz", f"{axyz[0]:.03f} {axyz[1]:.03f} {axyz[2]:.03f}")
         try:
-            arm.moveByXYZ(*axyz)
+            # arm.moveByXYZ(*axyz)
+            arm.moveByXYZthroughX(*axyz)
             time.sleep(3)
             arm.reset()
         except ValueError as e:

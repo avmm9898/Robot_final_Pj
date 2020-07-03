@@ -21,7 +21,8 @@ class Arm:
 
     def __del__(self):
         """ End with init position """
-        self.moveByAngle(self.init_up)
+        pass
+        # self.moveByAngle(self.init_up)
 
     @classmethod
     def xyzFromCamera(cls, x, y, z):
@@ -29,9 +30,10 @@ class Arm:
         Read XYZ from Camera to XYZ from Arm base
         """
         # Transformartion from camera frame to realworld frame
-        b = -0.255  # x component of arm base, measured: -.2325
-        w =  0.020  # y component of arm base, measured: .0235
-        h =  0.265  # z component of arm base, measured: .2975
+        # b = -0.245  # x component of arm base, measured: -.2325
+        b = -0.275  # x component of arm base, measured: -.2325
+        w = 0.010  # y component of arm base, measured: .0235
+        h =  0.215  # z component of arm base, measured: .2975
         cam_angle = 7  # camera yoll angle
         th_y = cam_angle * np.pi / 180 - 1 * np.pi / 2  # rotation about x axis
         th_z = -np.pi / 2                               # rotation about z axis
@@ -107,6 +109,14 @@ class Arm:
         """ Move the arm by given realworld xyz """
         ths = self.xyz2Angle(x, y, z)
         self.moveByAngle(ths, slow=slow, init_angle=init_angle)
+        return ths
+
+    def moveByXYZthroughX(self, x, y, z, slow=True, init_angle=None):
+        """ Move the arm like insert throung depth """
+        ths = self.xyz2Angle(x - 0.05, y, z)
+        self.moveByAngle(ths, slow=slow, init_angle=init_angle)
+        ths = self.xyz2Angle(x, y, z)
+        self.moveByAngle(ths, slow=slow, init_angle=self.prev_angle)
         return ths
 
 

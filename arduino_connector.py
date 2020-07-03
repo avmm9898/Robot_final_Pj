@@ -22,7 +22,8 @@ def writeArduino(s):
         If the echo did not match the input, which
         indicate the connectaion may fail.
     """
-    ser.open()
+    if not ser.is_open:
+        ser.open()
     # print("Send: ", s)
     ser.write(s.encode())
     while True:
