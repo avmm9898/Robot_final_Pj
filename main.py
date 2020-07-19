@@ -3,9 +3,9 @@ from functools import partial
 
 from realsense_basic import Camera
 from car_move_with_visual import detectAndApproach, carApproach, carApproachMinor
-from arm_move_with_visual import yoloDetect
+from arm_move_with_visual import yoloDetect, detectAndInsert
 from playYOLO import YOLO
-from arm_move import moveArmByAngle
+from arm_move import Arm
 from control import continueRun
 
 # load
@@ -34,7 +34,7 @@ try:
                 cam=cam)
 
     print("Insert")
-    detectAndInsert(cam, arm, partial(yoloDetect, hole_net.detect)),
+    detectAndInsert(cam, arm, partial(yoloDetect, hole_net.detect),
                     multiple=True)
 
 finally:
