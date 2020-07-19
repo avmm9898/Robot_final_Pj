@@ -3,6 +3,16 @@
 ## Target
 Insert the object into hole using robot(wheel and arm) with RGBD camera.
 
+## Result
+Final
+[![](https://github.com/avmm9898/Robot_final_Pj/blob/master/data/demo_all.png)](https://www.youtube.com/watch?v=BlEOE2fy_Zc)
+
+Approach
+[![](https://github.com/avmm9898/Robot_final_Pj/blob/master/data/demo_approach.png)](https://www.youtube.com/watch?v=7tt9smP7aGs)
+
+Insert
+[![](https://github.com/avmm9898/Robot_final_Pj/blob/master/data/demo_insert.png)](https://www.youtube.com/watch?v=eL94G9sQi4A)
+
 
 ## Files
 * `arduino_worker`
@@ -72,25 +82,19 @@ Insert the object into hole using robot(wheel and arm) with RGBD camera.
 https://drive.google.com/drive/u/1/folders/18e6d5P7vW5tq1IALxg0aSmPtt-QSELH9
 
 ## Document
-* Our Proposal
+* Proposal
   https://docs.google.com/document/d/18njmWKULvyB6Nja7IZb4NpPqIBjUhZPCYzez5XdNj9Y/edit
 
-* Our Progress 2
+* Progress 2
   https://github.com/avmm9898/Robot_final_Pj/blob/master/doc/Progress2.pdf
 
-* Our Final
-  Unfinished yet.
+* Final Report
+  https://docs.google.com/document/d/1U4hTdkWk3_W5jxNzboUAq03IZFFIPNzS-lzf1Dpz3Pk/edit?usp=sharing
 
 * YOLOv3 辨識模型，包含平台tiny、洞
   https://drive.google.com/drive/folders/1iq4aOWEoC3pH7jgbg-wTGPG5zBOkf2vy?usp=sharing
-  
-* Final report:
-  https://docs.google.com/document/d/1U4hTdkWk3_W5jxNzboUAq03IZFFIPNzS-lzf1Dpz3Pk/edit?usp=sharing
-  
-  
 
 ## State:
-
 1. YOLO偵測平台目標物，回傳XYZ，車子朝目標逼近
 2. 當行駛至70cm內，精準度增加，可以偵測深度(深度值700以內還算精準)
 3. 距離平台目標50cmcm左右，切換至洞偵測模型，開始辨識洞
