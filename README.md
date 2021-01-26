@@ -23,7 +23,7 @@ Insert
 * `control.py`
     Some utility
 * `playYOLO.py`
-    Yolo related codes
+    Yolo related codes, using openCV-dnn module to load darknet and detect object.
 * `realsense_basic.py`
     Camera Object for reading colored image and depth image
 * `arm_inverse_kinematic.py`
@@ -56,7 +56,8 @@ Insert
     * Python3.7+
     * numpy
     * pyserial
-
+* opencv-python
+    
 * Realsense
 `https://github.com/IntelRealSense/librealsense`
 
@@ -91,7 +92,7 @@ https://drive.google.com/drive/u/1/folders/18e6d5P7vW5tq1IALxg0aSmPtt-QSELH9
 * Final Report
   https://docs.google.com/document/d/1U4hTdkWk3_W5jxNzboUAq03IZFFIPNzS-lzf1Dpz3Pk/edit?usp=sharing
 
-* YOLOv3 辨識模型，包含平台tiny、洞
+* YOLOv3 weights，包含平台tiny、洞
   https://drive.google.com/drive/folders/1iq4aOWEoC3pH7jgbg-wTGPG5zBOkf2vy?usp=sharing
 
 ## State:
